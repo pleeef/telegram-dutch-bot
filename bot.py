@@ -248,7 +248,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 {"role": "system", "content": "You are a helpful Dutch language teacher."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=50,
+            max_tokens=150,
         )
         sentence_to_translate = response.choices[0].message.content.strip()
         # Сохраняем предложение для проверки
