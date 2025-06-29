@@ -19,6 +19,7 @@ TELEGRAM_TOKEN = os.environ.get("TELEGRAM_TOKEN")
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 AUTHORIZED_USERS_STR = os.environ.get("AUTHORIZED_USERS", "")
 AUTHORIZED_USERS = [int(user_id) for user_id in AUTHORIZED_USERS_STR.split(',') if user_id]
+
 # ------------------------------------
 
 # Инициализируем клиента OpenAI
@@ -41,7 +42,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         logger.info(f"Unauthorized user {user.id} tried to use the bot.")
         return
 
-    # --- ИЗМЕНЕННЫЙ ТЕКСТ: Обновлено описание команды /translation ---
     await update.message.reply_html(
         rf"Hoi, {user.mention_html()}! I'm your bot for learning Dutch. "
         "Here's what I can do:\n\n"
@@ -53,8 +53,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "**Reading:**\n"
         " /reading [level, topic] — short text with questions\n\n"
         "**Translation:**\n"
-        " /translation [level] [style] [topic] — translate the text into Dutch\n"
-        "   Style codes: A=Alice, N=Nabokov, F=Fantasy, T=Travel, L=Tearning\n\n"
+        " /translation [level, topic] — translate the sentence into Dutch\n\n"
         "**Dictionary:**\n"
         " /word [word] — definition, examples and synonyms\n\n"
         "Start with any command! 🇳🇱",
@@ -70,8 +69,6 @@ async def chat(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Сбрасываем старый режим и устанавливаем новый
     context.user_data.clear()
     context.user_data['mode'] = 'chat'
-    # --- НОВАЯ ЛОГИКА: Инициализация истории сообщений ---
-    context.user_data['messages'] = [{"role": "system", "content": "You are a friendly and helpful Dutch language tutor. You engage in a free conversation with the user in Dutch. If the user makes a grammatical mistake, you correct it and explain the correction briefly and clearly in ENGLISH. Then you continue the conversation in Dutch."}]
     await update.message.reply_text(
         "Oké, laten we praten! We kunnen over je dag praten of iets anders. Antwoord in het Nederlands, ik corrigeer je als het nodig is."
     )
@@ -92,21 +89,18 @@ async def roleplay(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.user_data['mode'] = 'roleplay'
     context.user_data['roleplay_topic'] = " ".join(args)
     
-    # --- НОВАЯ ЛОГИКА: Инициализация истории с системным сообщением ---
-    context.user_data['messages'] = [{"role": "system", "content": f"You are a helpful language assistant guiding a role-playing game on the topic: '{context.user_data['roleplay_topic']}'. You correct the user's mistakes and explain them briefly in ENGLISH. You start the conversation."}]
-    
-    # ИЗМЕНЕННЫЙ PROMPT: Теперь он просто просит начать, а вся логика задана в system-сообщении
-    prompt_start = f"Start the role-playing game in Dutch based on the topic: '{context.user_data['roleplay_topic']}'. Begin with a suitable sentence."
+    prompt = f"Je bent een AI-taalassistent die een rollenspel begeleidt. We gaan een rollenspel spelen over het onderwerp: '{context.user_data['roleplay_topic']}'. Jij begint. Begin met een passende zin. Ik ben de andere deelnemer en ik wil dat je me corrigeert als ik fouten maak in het Nederlands. Begin nu."
 
     try:
         response = openai.chat.completions.create(
             model="gpt-4o",
-            messages=context.user_data['messages'] + [{"role": "user", "content": prompt_start}],
+            messages=[
+                {"role": "system", "content": "You are a helpful language learning assistant for Dutch."},
+                {"role": "user", "content": prompt}
+            ],
             max_tokens=150,
         )
         roleplay_start_text = response.choices[0].message.content.strip()
-        # --- НОВАЯ ЛОГИКА: Добавляем ответ бота в историю ---
-        context.user_data['messages'].append({"role": "assistant", "content": roleplay_start_text})
         await update.message.reply_text(f"Oké, laten we beginnen! We doen een rollenspel over '{context.user_data['roleplay_topic']}'.\n\n{roleplay_start_text}")
         logger.info(f"User {update.effective_user.id} started roleplay on topic: {context.user_data['roleplay_topic']}.")
     except Exception as e:
@@ -126,7 +120,6 @@ async def explain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Сбрасываем режим
     context.user_data.clear()
     
-    # Этот prompt уже включает просьбу об объяснении на английском/русском
     prompt = f"Leg de grammatica in het Nederlands van de volgende zin/regel uit: '{sentence}'. Leg het duidelijk uit, gebruik makkelijke woorden en geef indien mogelijk voorbeelden. Geef ook een korte en duidelijke uitleg in het Engels of Russisch erbij."
 
     try:
@@ -217,51 +210,36 @@ async def word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # --- НОВАЯ КОМАНДА: /translation ---
 async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Запускает режим перевода, выдавая текст в заданном стиле."""
+    """Запускает режим перевода."""
     if not is_authorized(update.effective_user.id): return
 
-    # --- ИЗМЕНЕННЫЙ РАЗБОР АРГУМЕНТОВ ---
     args = context.args
+    # Сбрасываем старый режим и устанавливаем новый
     context.user_data.clear()
     context.user_data['mode'] = 'translation'
     
     level = 'B1' # Уровень по умолчанию
-    style_code = 'L' # Стиль по умолчанию (Fantasy)
-    topic = 'general' # Тема по умолчанию
+    topic = 'algemeen' # Тема по умолчанию
     
     valid_levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
-    valid_styles = ['A', 'N', 'F', 'T', 'L'] # A=Alice, N=Nabokov, F=Fantasy, T=Travel, L=Learning
     
-    # Разбираем аргументы: [level] [style] [topic]
     if args:
-        # Проверяем первый аргумент на уровень
+        # Пытаемся определить уровень из аргументов
         if args[0].upper() in valid_levels:
             level = args[0].upper()
-            args = args[1:] # "Потребляем" аргумент уровня
-        
-        # Проверяем следующий аргумент на стиль
-        if args and args[0].upper() in valid_styles:
-            style_code = args[0].upper()
-            args = args[1:] # "Потребляем" аргумент стиля
-        
-        # Всё, что осталось, это тема
-        if args:
+            topic = " ".join(args[1:]) if len(args) > 1 else 'algemeen'
+        else:
+            # Если первый аргумент не уровень, считаем его темой
             topic = " ".join(args)
 
     context.user_data['translation_level'] = level
-    context.user_data['translation_style'] = style_code
     
-    # --- НОВАЯ ЛОГИКА: Словарь промптов для разных стилей ---
-    prompts = {
-    'A': (f"Generate a short, original text of three sentences in English in the style of Lewis Carroll's 'Through the Looking-Glass' (Alice in Wonderland part 2), suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-    'N': (f"Generate a short, elegant English text of three sentences in the style of Vladimir Nabokov, suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-    'F': (f"Generate a short, original text of three sentences in English in the style of a modern fairytale or a young adult fantasy book. The sentences should be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-    'T': (f"Generate a short, original text of three sentences in English that describes a place or an event, as if it comes from a traveler's journal. The sentences should have a vivid but clear writing style and be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-    'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-    }
-    
-    # Выбираем промпт из словаря. Если стиль не найден, используем 'F' (фэнтези) по умолчанию
-    prompt = prompts.get(style_code, prompts['F'])
+    #prompt = f"Geef mij één, niet te lange zin in het Engels op niveau {level} over het onderwerp '{topic}'. Deze zin moet ik vertalen naar het Nederlands. Geef alleen de zin, zonder extra uitleg."
+    prompt = (
+    f"Genereer een korte, originele tekst van drie zinnen in het Engels in de stijl van het boek 'Through the Looking-Glass' (Alice in Wonderland deel 2). "
+    f"De tekst moet geschikt zijn voor vertaling naar niveau {level} Nederlands. "
+    f"Geef alleen de zinnen, zonder extra uitleg of aanhalingstekens."
+    )
 
     try:
         response = openai.chat.completions.create(
@@ -272,16 +250,15 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             ],
             max_tokens=150,
         )
-        text_to_translate = response.choices[0].message.content.strip()
-        # Сохраняем ТЕКСТ для проверки (переименовано sentence -> text)
-        context.user_data['text_to_translate'] = text_to_translate
+        sentence_to_translate = response.choices[0].message.content.strip()
+        # Сохраняем предложение для проверки
+        context.user_data['sentence_to_translate'] = sentence_to_translate
         
-        # --- ИЗМЕНЕННОЕ СООБЩЕНИЕ ПОЛЬЗОВАТЕЛЮ (zin -> text) ---
         await update.message.reply_text(
-            f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
-            f"**{text_to_translate}**"
+            f"Oké, laten we vertalen! Vertaal de volgende zin naar het Nederlands (niveau {level}, onderwerp: '{topic}'):\n\n"
+            f"**{sentence_to_translate}**"
         )
-        logger.info(f"User {update.effective_user.id} started a translation task. Level: {level}, Style: {style_code}, Topic: {topic}.")
+        logger.info(f"User {update.effective_user.id} started a translation task. Level: {level}, Topic: {topic}.")
     except Exception as e:
         logger.error(f"Error in translation start: {e}")
         await update.message.reply_text("An error occurred. Please try again.")
@@ -294,75 +271,53 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     user_text = update.message.text
     mode = context.user_data.get('mode')
 
-    # --- НОВАЯ ЛОГИКА ДЛЯ ДИАЛОГА (chat/roleplay) ---
-    if mode == 'chat' or mode == 'roleplay':
-        # Добавляем сообщение пользователя в историю
-        context.user_data['messages'].append({"role": "user", "content": user_text})
-        
-        # Ограничиваем историю, чтобы она не была слишком длинной и дорогой
-        max_history_length = 10 # 5 пар сообщений (user + bot) + system-prompt
-        if len(context.user_data['messages']) > max_history_length:
-            # Сохраняем system-prompt и последние N сообщений
-            context.user_data['messages'] = [context.user_data['messages'][0]] + context.user_data['messages'][-max_history_length:]
-
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-4o",
-                messages=context.user_data['messages'], # Передаем всю историю
-                max_tokens=250,
-            )
-            reply_text = response.choices[0].message.content.strip()
-            # Добавляем ответ бота в историю
-            context.user_data['messages'].append({"role": "assistant", "content": reply_text})
-            await update.message.reply_text(reply_text)
-            logger.info(f"User {update.effective_user.id} sent a message in {mode} mode.")
-        except Exception as e:
-            logger.error(f"Error in handle_message for {mode} mode: {e}")
-            await update.message.reply_text("An error occurred. Please try again.")
-
-    # --- ИЗМЕНЕННЫЙ БЛОК ДЛЯ ПЕРЕВОДА (translation) ---
+    if mode == 'chat':
+        # Prompt для чата
+        prompt = f"De gebruiker heeft in het Nederlands geschreven: '{user_text}'. Je rol is om de gebruiker te corrigeren als hij fouten maakt, de correctie uit te leggen en een passend antwoord te geven. Antwoord in het Nederlands."
+    elif mode == 'roleplay':
+        # Prompt для ролевой игры
+        topic = context.user_data.get('roleplay_topic', 'het rollenspel')
+        prompt = f"We doen een rollenspel over '{topic}'. De gebruiker heeft gezegd: '{user_text}'. Geef een passend antwoord in het Nederlands en corrigeer eventuele grammaticale fouten van de gebruiker. Als er een fout is, leg dan uit waarom het fout is."
     elif mode == 'translation':
-        # Переименовано sentence -> text
-        original_text = context.user_data.get('text_to_translate', 'No text was provided.')
+        # Prompt для проверки перевода
+        original_sentence = context.user_data.get('sentence_to_translate', 'No sentence was provided.')
         
         # Сбрасываем режим после получения ответа
         context.user_data.clear()
         
-        # --- ИЗМЕНЕННЫЙ PROMPT: Запрашивает короткий ответ и пояснения на английском ---
         prompt = (
-            f"The original English text was: '{original_text}'. "
-            f"The user provided this translation: '{user_text}'. "
-            "Your task is to check the translation. "
-            "1. First, provide the correct Dutch translation of the text. "
-            "2. Then, provide a very brief and concise explanation of any errors in ENGLISH. "
-            "Your entire answer must be short and direct. "
-            "End your response with a sentence like: 'Try a new translation with /translation [level]!'."
+            f"De oorspronkelijke Engelse zin was: '{original_sentence}'. "
+            f"De gebruiker heeft deze vertaling gegeven: '{user_text}'. "
+            "Controleer de vertaling. Geef eerst de correcte Nederlandse vertaling. "
+            "Als de gebruiker fouten heeft gemaakt, leg dan duidelijk uit welke fouten zijn gemaakt en hoe ze gecorrigeerd kunnen worden. "
+            "Eindig met een zin zoals 'Probeer een nieuwe vertaling met /translation [niveau]!'. "
+            "Antwoord in het Nederlands en formatteer het antwoord duidelijk."
         )
-
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a helpful Dutch language teacher."},
-                    {"role": "user", "content": prompt}
-                ],
-                # УВЕЛИЧЕН MAX_TOKENS для более полных, но не обрезанных ответов
-                max_tokens=400,
-            )
-            reply_text = response.choices[0].message.content.strip()
-            await update.message.reply_text(reply_text)
-            logger.info(f"User {update.effective_user.id} sent a message in translation mode.")
-        except Exception as e:
-            logger.error(f"Error in handle_message for translation mode: {e}")
-            await update.message.reply_text("An error occurred. Please try again.")
 
     else:
         # Если не в режиме, предлагает начать
         await update.message.reply_text(
-            "To get started, use one of the commands: `/chat`, `/roleplay`, `/translation` etc."
+            "To get started, use one of the commands: `/chat`, `/roleplay`, `/translation` и т.д. "
         )
         return
         
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o",
+            messages=[
+                {"role": "system", "content": "You are a helpful Dutch language teacher and speaking partner."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=250,
+        )
+        reply_text = response.choices[0].message.content.strip()
+        await update.message.reply_text(reply_text)
+        logger.info(f"User {update.effective_user.id} sent a message in {mode} mode.")
+    except Exception as e:
+        logger.error(f"Error in handle_message: {e}")
+        await update.message.reply_text("An error occurred. Please try again.")
+
+
 # --- Основная функция для запуска бота ---
 def main() -> None:
     """Запускает бота."""
