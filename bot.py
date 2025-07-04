@@ -344,7 +344,7 @@ async def practice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             selection_prompt = f"Suggest a very common Dutch {sub_mode} for level {level} to practice. Provide only the {sub_mode} itself, no extra text."
             selection_response = openai.chat.completions.create(
                 model="gpt-4o",
-                messages=[{"role": "system": "You are a helpful language assistant."}, {"role": "user": selection_prompt}],
+                messages=[{"role": "system", "content": "You are a helpful language assistant."}, {"role": "user", "content": selection_prompt}],
                 max_tokens=10,
             )
             item = selection_response.choices[0].message.content.strip()
