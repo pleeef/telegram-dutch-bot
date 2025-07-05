@@ -285,9 +285,9 @@ async def practice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     context.user_data.clear() # Сбрасываем старый режим
     context.user_data['mode'] = 'practice'
 
-    level = 'B1' # Уровень по умолчанию
-    sub_mode = 'verb'
-    item = 'vergeten' # Предлог, глагол или слово для тренировки
+    level = 'B2' # Уровень по умолчанию
+    sub_mode = 'prep' # Режим по умолчанию
+    item = 'aan' # Предлог по умолчанию
 
     valid_levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
     valid_sub_modes = ['prep', 'verb', 'word']
@@ -298,23 +298,23 @@ async def practice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # if not args:
     #     await update.message.reply_text("Please specify the practice mode (prep, verb, word). Example: `/practice prep` or `/practice B1 verb gaan`")
     #     return
-
-    # Попытка определить уровень как первый аргумент
-    if args[0].upper() in valid_levels:
-        level = args[0].upper()
-        args = args[1:] # Потребляем уровень
-    
-    # Попытка определить подрежим как следующий аргумент
-    if args and args[0].lower() in valid_sub_modes:
-        sub_mode = args[0].lower()
-        args = args[1:] # Потребляем подрежим
-    else:
-        await update.message.reply_text(f"Invalid practice mode. Please use one of: {', '.join(valid_sub_modes)}. Example: `/practice prep`")
-        return
-
-    # Всё, что осталось, это элемент для тренировки
     if args:
-        item = " ".join(args)
+    # Попытка определить уровень как первый аргумент
+        if args[0].upper() in valid_levels:
+            level = args[0].upper()
+            args = args[1:] # Потребляем уровень
+        
+        # Попытка определить подрежим как следующий аргумент
+        if args and args[0].lower() in valid_sub_modes:
+            sub_mode = args[0].lower()
+            args = args[1:] # Потребляем подрежим
+        else:
+            await update.message.reply_text(f"Invalid practice mode. Please use one of: {', '.join(valid_sub_modes)}. Example: `/practice prep`")
+            return
+
+        # Всё, что осталось, это элемент для тренировки
+        if args:
+            item = " ".join(args)
 
     context.user_data['practice_level'] = level
     context.user_data['practice_sub_mode'] = sub_mode
