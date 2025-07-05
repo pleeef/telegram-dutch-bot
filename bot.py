@@ -295,9 +295,9 @@ async def practice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Разбираем аргументы: [level] [sub_mode] [item]
     # Пример: /practice B1 prep in
     # Пример: /practice verb
-    if not args:
-        await update.message.reply_text("Please specify the practice mode (prep, verb, word). Example: `/practice prep` or `/practice B1 verb gaan`")
-        return
+    # if not args:
+    #     await update.message.reply_text("Please specify the practice mode (prep, verb, word). Example: `/practice prep` or `/practice B1 verb gaan`")
+    #     return
 
     # Попытка определить уровень как первый аргумент
     if args[0].upper() in valid_levels:
@@ -308,9 +308,9 @@ async def practice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if args and args[0].lower() in valid_sub_modes:
         sub_mode = args[0].lower()
         args = args[1:] # Потребляем подрежим
-    # else:
-    #     await update.message.reply_text(f"Invalid practice mode. Please use one of: {', '.join(valid_sub_modes)}. Example: `/practice prep`")
-    #     return
+    else:
+        await update.message.reply_text(f"Invalid practice mode. Please use one of: {', '.join(valid_sub_modes)}. Example: `/practice prep`")
+        return
 
     # Всё, что осталось, это элемент для тренировки
     if args:
