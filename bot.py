@@ -55,7 +55,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         " /reading [level, topic] — short text with questions\n\n"
         "**Translation:**\n"
         " /translation [level] [style] [topic] — translate the text into Dutch\n"
-        "   Style codes: A=Alice, D=Dickens, F=Fantasy, T=Travel, L=Learning\n\n"
+        "   Style codes: A=Alice, N=Nabokov, F=Fantasy, T=Travel, L=Learning\n\n"
         "**Practice:**\n"
         " /practice [level] [mode] [item] — specific practice (e.g., `/practice B1 prep in`)\n"
         "   Modes: `prep` (prepositions), `verb` (verbs), `word` (vocabulary)\n"
@@ -224,7 +224,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     topic = 'general' # Тема по умолчанию
     
     valid_levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']
-    valid_styles = ['A', 'D', 'F', 'T', 'L'] # A=Alice, N=Nabokov, F=Fantasy, T=Travel, L=Learning
+    valid_styles = ['A', 'N', 'F', 'T', 'L'] # A=Alice, N=Nabokov, F=Fantasy, T=Travel, L=Learning
     
     # Разбираем аргументы: [level] [style] [topic]
     if args:
@@ -247,7 +247,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     
     prompts = {
         'A': (f"Generate a short, original text of three sentences in English in the style of Lewis Carroll's 'Through the Looking-Glass' (Alice in Wonderland part 2), suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-        'D': (f"Generate a short, elegant English text of three sentences in the style of Charles Dickens, suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+        'N': (f"Generate a short, original text of three sentences in English in the style of Vladimir Nabokov's 'Invitation to a Beheading', suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
         'F': (f"Generate a short, original text of three sentences in English in the style of a modern fairytale or a young adult fantasy book. The sentences should be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
         'T': (f"Generate a short, original text of three sentences in English that describes a place or an event, as if it comes from a traveler's journal. The sentences should have a vivid but clear writing style and be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
         'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
