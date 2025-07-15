@@ -255,7 +255,9 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     context.user_data['translation_style'] = style_code
 
     def get_random_letter():
-        return random.choice(string.ascii_uppercase)
+        excluded = {'Q', 'X', 'Y', 'Z', 'W'}
+        allowed_letters = [letter for letter in string.ascii_uppercase if letter not in excluded]
+        return random.choice(allowed_letters)
 
     random_letter = get_random_letter()
     
