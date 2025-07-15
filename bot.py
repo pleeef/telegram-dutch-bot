@@ -5,6 +5,7 @@ import openai
 import re
 import os
 import random # Для выбора случайных предлогов/глаголов/слов по умолчанию
+import string
 
 # Настройте логирование, чтобы видеть, что происходит с ботом
 logging.basicConfig(
@@ -192,7 +193,15 @@ async def word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     context.user_data.clear() # Сбрасываем режим
 
-    prompt = f"Geef een gedetailleerde uitleg van het Nederlandse woord '{word_to_define}'. Geef de definitie, minimaal twee voorbeeldzinnen, en eventuele synoniemen of gerelateerde uitdrukkingen. Formatteer de antwoord duidelijk."
+    # prompt = f"Geef een gedetailleerde uitleg van het Nederlandse woord '{word_to_define}'. Geef de definitie, minimaal twee voorbeeldzinnen, en eventuele synoniemen of gerelateerde uitdrukkingen. Formatteer de antwoord duidelijk."
+    prompt = f"""Give a detailed explanation of the Dutch word '{word_to_define}'. Include the following:
+                    1. A clear definition in English.
+                    2. At least two example sentences in natural Dutch (with English translations).
+                    3. Any useful synonyms or related expressions.
+                    4. A brief note on the word's origin or etymology, if known.
+                    5. A memory aid (mnemonic) or trick to help remember the word.
+
+                    Format the answer clearly using section headers for each part."""
 
     try:
         response = openai.chat.completions.create(
@@ -244,17 +253,23 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 
     context.user_data['translation_level'] = level
     context.user_data['translation_style'] = style_code
+
+    def get_random_letter():
+        return random.choice(string.ascii_uppercase)
+
+    random_letter = get_random_letter()
     
     prompts = {
         #'A': (f"Generate a short, original text of three sentences in English in the style of Lewis Carroll's 'Through the Looking-Glass' (Alice in Wonderland part 2), suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-        'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. No explanation, no quotation marks. Give only the sentences."),
+        #'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. No explanation, no quotation marks. Give only the sentences."),
+        'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. The subject of the sentences must begin with the letter '{random_letter}' (e.g. if 'B', it could be 'Bear', 'Ball', etc). No explanation, no quotation marks. Give only the sentences."),
         #'N': (f"Generate a short, original text of three sentences in English in the style of Vladimir Nabokov's 'Invitation to a Beheading', suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-        'N': (f"Write a short, simple text in English (three sentences) using only {level}-level vocabulary and grammar. The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading' (not poetic). Avoid metaphors. No explanation, no quotation marks. Give only the sentences."),
+        'N': (f"Write a short, simple text in English (three sentences) using only {level}-level vocabulary and grammar. The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading' (not poetic). Avoid metaphors. The subject of the sentences must begin with the letter '{random_letter}' (e.g. if 'B', it could be 'Bear', 'Ball', etc). No explanation, no quotation marks. Give only the sentences."),
         'F': (f"Generate a short, original text of three sentences in English in the style of a modern fairytale or a young adult fantasy book. The sentences should be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
         'T': (f"Generate a short, original text of three sentences in English that describes a place or an event, as if it comes from a traveler's journal. The sentences should have a vivid but clear writing style and be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
         'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
     }
-    
+
     prompt = prompts.get(style_code, prompts['L']) # Default to Learning style for translation
 
     try:
