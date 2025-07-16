@@ -197,9 +197,7 @@ async def word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     prompt = f"""Give a detailed explanation of the Dutch word '{word_to_define}'. Include the following:
                     1. A clear definition in English.
                     2. At least two example sentences in natural Dutch (with English translations).
-                    3. Any useful synonyms or related expressions.
-                    4. A brief note on the word's origin or etymology, if known.
-                    5. A memory aid (mnemonic) or trick to help remember the word.
+                    3. A memory aid (mnemonic) or trick to help remember the word.
 
                     Format the answer clearly using section headers for each part."""
 
