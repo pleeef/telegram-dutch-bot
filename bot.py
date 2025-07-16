@@ -210,7 +210,7 @@ async def word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "system", "content": "You are a helpful Dutch vocabulary assistant."},
                 {"role": "user", "content": prompt}
             ],
-            max_tokens=250,
+            max_tokens=500,
         )
         word_info = response.choices[0].message.content.strip()
         await update.message.reply_text(word_info)
