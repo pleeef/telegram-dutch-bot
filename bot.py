@@ -474,12 +474,24 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         # Очищаем режим перевода после проверки ответа
         context.user_data.clear() 
         
+        # prompt = (
+        #     f"The original English text was: '{original_text}'. "
+        #     f"The user provided this translation: '{user_text}'. "
+        #     "Your task is to check the translation. "
+        #     "1. First, provide the correct Dutch translation of the text. "
+        #     "2. Then, provide a very brief and concise explanation of any errors in ENGLISH. "
+        #     "Your entire answer must be short and direct. "
+        #     "End your response with a sentence like: 'Try a new translation with /translation [level] [style]!'."
+        # )
         prompt = (
             f"The original English text was: '{original_text}'. "
             f"The user provided this translation: '{user_text}'. "
             "Your task is to check the translation. "
             "1. First, provide the correct Dutch translation of the text. "
             "2. Then, provide a very brief and concise explanation of any errors in ENGLISH. "
+            "3. Finally, give a score from 1 to 10 based on the accuracy, grammar, word choice, and naturalness of the translation. "
+            "The score should be an estimate of how well the user captured the meaning and used correct Dutch. "
+            "Explain the score briefly in 1 sentence. "
             "Your entire answer must be short and direct. "
             "End your response with a sentence like: 'Try a new translation with /translation [level] [style]!'."
         )
@@ -526,6 +538,9 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "Your task is to check the user's translation. "
             "1. First, provide the correct Dutch translation of the original English sentences. "
             "2. Then, give a very brief and concise explanation of any errors in the user's translation in ENGLISH. "
+            "3. Finally, give a score from 1 to 10 based on the accuracy, grammar, word choice, and naturalness of the translation. "
+            "The score should be an estimate of how well the user captured the meaning and used correct Dutch. "
+            "Explain the score briefly in 1 sentence. "
             "Your entire answer must be short and direct. "
             "End your response with a clear instruction: 'Ready for the next set? Type /more or start a new practice session with /practice [level] [mode] [item]!'"
         )
