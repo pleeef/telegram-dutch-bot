@@ -763,6 +763,7 @@ def main() -> None:
     # ДОБАВЛЕНЫ НОВЫЕ КОМАНДЫ
     application.add_handler(CommandHandler("practice", practice))
     application.add_handler(CommandHandler("more", more))
+    application.add_handler(CommandHandler("exam", exam))
     
     # Обработчик для всех текстовых сообщений
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
