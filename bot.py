@@ -493,6 +493,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "Geef een oefenopdracht voor het onderdeel 'lezen' op B1-niveau van het Staatsexamen NT2. "
             "Gebruik een korte tekst (maximaal 100 woorden) met 1-2 meerkeuzevragen. "
             "De context moet actueel of praktisch zijn (zoals werk, gemeente, school)."
+            "Geef alleen de opdracht, geen voorbeeldantwoord."
         )
         role = "You are an NT2 reading exam trainer."
     elif skill == 'speaking':
@@ -500,11 +501,13 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "Geef een oefenopdracht voor het onderdeel 'spreken' op B1-niveau van het Staatsexamen NT2. "
             "Gebruik een realistische situatie (bijvoorbeeld werk, winkel, buren). "
             "Beschrijf wat de kandidaat moet zeggen of reageren."
+            "Geef alleen de opdracht, geen voorbeeldantwoord."
         )
         role = "You are an NT2 speaking exam trainer."
     elif skill == 'culture':
         prompt = (
             "Geef een korte cultuurquiz of vraag over de Nederlandse samenleving, wetten of gewoonten, geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau."
+            "Geef alleen de vraag, geen antwoord."
         )
         role = "You are a Dutch integration exam trainer."
 
