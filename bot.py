@@ -506,8 +506,13 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         role = "You are an NT2 speaking exam trainer."
     elif skill == 'culture':
         prompt = (
-            "Geef een korte cultuurquiz of vraag over de Nederlandse samenleving, wetten of gewoonten, geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau."
-            "Geef alleen de vraag, geen antwoord."
+            # "Geef een korte cultuurquiz of vraag over de Nederlandse samenleving, wetten of gewoonten, geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau."
+            # "Geef alleen de vraag, geen antwoord."
+            "Geef een korte cultuurquizvraag over de Nederlandse samenleving, wetten of gewoonten, "
+            "geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau. "
+            "De vraag moet vergezeld gaan van vier (4) meerkeuzeopties (A, B, C, D). "
+            "Geef alleen de vraag en de opties, ZONDER het juiste antwoord te markeren of te vermelden. "
+            "Formateer de opties duidelijk, bijvoorbeeld: 'A) Optie 1\\nB) Optie 2'."
         )
         role = "You are a Dutch integration exam trainer."
 
