@@ -26,22 +26,6 @@ AUTHORIZED_USERS = [int(user_id) for user_id in AUTHORIZED_USERS_STR.split(',') 
 # Инициализируем клиента OpenAI
 openai.api_key = OPENAI_API_KEY
 
-# Константы для режима /exam
-# --- Константы для сообщений ---
-MSG_NO_SKILL = "Please, provide skill: `/exam reading`, `/exam writing`, `/exam speaking` or `/exam culture`."
-MSG_INVALID_SKILL = "Incorrect skill. Select one from: reading, writing, speaking, culture."
-MSG_ERROR_OCCURRED = "Error occured. Please, Try again."
-MSG_EXAM_TASK_TITLE = "📘 *{} task:*\n\n{}" # Используется для форматирования вывода
-MSG_API_ERROR = "API Error: {}. Please, Try again."
-MSG_EXAM_CONTEXT_ERROR = "Something went wrong with the exam task. Please try `/exam` again."
-MSG_EXAM_FEEDBACK_TITLE = "📝 *Your answer to the task '{}' has been assessed:*\n\n{}"
-
-# --- Константы для типов письменных заданий ---
-WRITING_TYPES = ['brief', 'verslag', 'formulier invullen', 'klacht indienen']
-
-# --- Список разрешенных навыков ---
-ALLOWED_SKILLS = ['reading', 'writing', 'speaking', 'culture']
-
 # --- Проверка доступа ---
 def is_authorized(user_id):
     """Проверяет, имеет ли пользователь право использовать бота."""
@@ -77,9 +61,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         " /practice [level] [mode] [item] — specific practice (e.g., `/practice B1 prep in`)\n"
         "   Modes: `prep` (prepositions), `verb` (verbs), `word` (vocabulary)\n"
         "   Use `/more` to get more sentences in the current practice session.\n\n"
-        "**Exam Preparation:**\n" # Новый раздел
-        " /exam [skill] — get a B1-level exam task (e.g., `/exam writing`)\n"
-        "   Skills: `reading`, `writing`, `speaking`, `culture`\n\n"
         "**Dictionary:**\n"
         " /word [word] — definition, examples and synonyms\n\n"
         "Start with any command! 🇳🇱",
@@ -457,84 +438,6 @@ async def more(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("An error occurred while getting more practice sentences. Please try again or start a new practice.")
 
 
-# --- НОВАЯ КОМАНДА: /exam ---
-async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Предоставляет пример экзаменационного задания B1 уровня."""
-    if not is_authorized(update.effective_user.id): return
-
-    if not context.args:
-        await update.message.reply_text(MSG_NO_SKILL)
-        return
-
-    skill = context.args[0].lower()
-    if skill not in ALLOWED_SKILLS:
-        await update.message.reply_text(MSG_INVALID_SKILL)
-        return
-
-    # Очищаем все предыдущие данные пользователя, чтобы начать новое задание
-    context.user_data.clear()
-
-    prompt = ""
-    role = ""
-    writing_task_type = random.choice(WRITING_TYPES) # Выбираем тип для письменного задания
-
-    # Создаем prompt в зависимости от навыка
-    if skill == 'writing':
-        prompt = (
-            f"Geef een realistische oefenopdracht voor het onderdeel 'schrijven' van het NT2 Staatsexamen B1-niveau. "
-            f"Het type opdracht moet zijn: '{writing_task_type}'. "
-            f"Schrijf de opdracht duidelijk in het Nederlands. "
-            "Gebruik moderne en relevante context. "
-            "Geef alleen de opdracht, geen voorbeeldantwoord."
-        )
-        role = "You are an NT2 writing exam trainer."
-    elif skill == 'reading':
-        prompt = (
-            "Geef een oefenopdracht voor het onderdeel 'lezen' op B1-niveau van het Staatsexamen NT2. "
-            "Gebruik een korte tekst (maximaal 100 woorden) met 1-2 meerkeuzevragen. "
-            "De context moet actueel of praktisch zijn (zoals werk, gemeente, school)."
-        )
-        role = "You are an NT2 reading exam trainer."
-    elif skill == 'speaking':
-        prompt = (
-            "Geef een oefenopdracht voor het onderdeel 'spreken' op B1-niveau van het Staatsexamen NT2. "
-            "Gebruik een realistische situatie (bijvoorbeeld werk, winkel, buren). "
-            "Beschrijf wat de kandidaat moet zeggen of reageren."
-        )
-        role = "You are an NT2 speaking exam trainer."
-    elif skill == 'culture':
-        prompt = (
-            "Geef een korte cultuurquiz of vraag over de Nederlandse samenleving, wetten of gewoonten, geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau."
-        )
-        role = "You are a Dutch integration exam trainer."
-
-    try:
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": role},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=500,
-        )
-        exam_task = response.choices[0].message.content.strip()
-
-        # --- Сохраняем контекст для handle_message ---
-        context.user_data['mode'] = 'exam' # Устанавливаем режим 'exam'
-        context.user_data['exam_skill'] = skill # Сохраняем выбранный навык
-        context.user_data['exam_task'] = exam_task # Сохраняем текст сгенерированного задания
-        # --- Конец сохранения контекста ---
-
-        await update.message.reply_text(MSG_EXAM_TASK_TITLE.format(skill.capitalize(), exam_task), parse_mode="Markdown")
-        logger.info(f"User {update.effective_user.id} requested exam task for: {skill}.")
-    except openai.APIError as e:
-        logger.error(f"OpenAI API Error in /exam: {e}")
-        await update.message.reply_text(MSG_API_ERROR.format(e))
-    except Exception as e:
-        logger.error(f"An unexpected error occurred in /exam: {e}")
-        await update.message.reply_text(MSG_ERROR_OCCURRED)
-
-
 # --- Обработчик текстовых сообщений ---
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает текстовые сообщения в режиме /chat, /roleplay, /translation или /practice."""
@@ -660,85 +563,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         except Exception as e:
             logger.error(f"Error in handle_message for practice mode: {e}")
             await update.message.reply_text("An error occurred while checking your answer. Please try again.")
-    
-    # --- НОВЫЙ БЛОК ДЛЯ РЕЖИМА EXAM ---
-    elif mode == 'exam':
-        exam_skill = context.user_data.get('exam_skill')
-        exam_task = context.user_data.get('exam_task')
-
-        if not exam_skill or not exam_task:
-            await update.message.reply_text(MSG_EXAM_CONTEXT_ERROR)
-            context.user_data.clear() # Очищаем на всякий случай
-            return
-
-        # Очищаем режим экзамена после получения ответа, чтобы бот вышел из этого режима
-        context.user_data.clear()
-
-        # Формируем промпт для оценки ответа пользователя
-        review_prompt = ""
-        system_role = "You are an NT2 exam evaluator." # Общая роль по умолчанию
-
-        if exam_skill == 'writing':
-            review_prompt = (
-                f"The user was given the following writing task for NT2 B1 level: "
-                f"'{exam_task}'\n\n"
-                f"The user's response is: '{user_text}'\n\n"
-                "Please evaluate the user's response based on NT2 B1 writing exam criteria. "
-                "Focus on grammar, vocabulary, coherence, and task fulfillment. "
-                "Provide specific feedback in clear, concise Dutch, followed by a score from 1 to 10. "
-                "Also, point out 1-2 main areas for improvement. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
-            )
-            system_role = "You are a strict but fair NT2 B1 writing exam evaluator."
-        elif exam_skill == 'reading':
-            # Для чтения, если ответ - это просто выбор буквы, можно проверить напрямую.
-            # Если ответ более сложный (например, объяснение), то это будет более "открытое" задание.
-            review_prompt = (
-                f"The user was given the following reading comprehension task for NT2 B1 level: "
-                f"'{exam_task}'\n\n"
-                f"The user's answer is: '{user_text}'\n\n"
-                "Please evaluate the user's answer. If it's a multiple choice, state if it's correct and why. "
-                "If it's an open question, assess its accuracy and completeness. "
-                "Provide feedback in Dutch and a score from 1 to 10. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
-            )
-            system_role = "You are a precise NT2 B1 reading comprehension evaluator."
-        elif exam_skill == 'speaking':
-            # Для говорения, поскольку мы получаем текст, нужно оценивать "транскрипцию"
-            review_prompt = (
-                f"The user was given the following speaking task for NT2 B1 level: "
-                f"'{exam_task}'\n\n"
-                f"The user's spoken response (as transcribed text) is: '{user_text}'\n\n"
-                "Please evaluate this text as if it were a spoken answer for NT2 B1. "
-                "Focus on fluency (as much as inferred from text), vocabulary, grammar, and pronunciation (if relevant in context). "
-                "Provide specific feedback in Dutch and a score from 1 to 10. "
-                "Point out 1-2 main areas for improvement. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
-            )
-            system_role = "You are an empathetic and constructive NT2 B1 speaking exam evaluator."
-        elif exam_skill == 'culture':
-            review_prompt = (
-                f"The user was given the following culture quiz/question for Dutch integration/NT2 B1 level: "
-                f"'{exam_task}'\n\n"
-                f"The user's answer is: '{user_text}'\n\n"
-                "Evaluate the user's answer for accuracy and completeness. "
-                "Provide the correct answer if needed. Give feedback in Dutch and a score from 1 to 10. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
-            )
-            system_role = "You are an informative Dutch culture expert and exam evaluator."
-
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": system_role},
-                {"role": "user", "content": review_prompt}
-            ],
-            max_tokens=600, # Увеличиваем токены для более подробного ответа
-        )
-        reply_text = response.choices[0].message.content.strip()
-        await update.message.reply_text(MSG_EXAM_FEEDBACK_TITLE.format(exam_skill.capitalize(), reply_text), parse_mode="Markdown")
-        logger.info(f"User {update.effective_user.id} received feedback for exam task ({exam_skill}).")
-
 
     else:
         # Если не в режиме, предлагает начать
