@@ -78,7 +78,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         "   Modes: `prep` (prepositions), `verb` (verbs), `word` (vocabulary)\n"
         "   Use `/more` to get more sentences in the current practice session.\n\n"
         "**Exam Preparation:**\n" # Новый раздел
-        " /exam [skill] — get a B1-level exam task (e.g., `/exam writing`)\n"
+        " /exam [skill] — get a A2-level exam task (e.g., `/exam writing`)\n"
         "   Skills: `reading`, `writing`, `speaking`, `culture`\n\n"
         "**Dictionary:**\n"
         " /word [word] — definition, examples and synonyms\n\n"
@@ -459,7 +459,7 @@ async def more(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 # --- НОВАЯ КОМАНДА: /exam ---
 async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Предоставляет пример экзаменационного задания B1 уровня."""
+    """Предоставляет пример экзаменационного задания A2 уровня."""
     if not is_authorized(update.effective_user.id): return
 
     if not context.args:
@@ -481,7 +481,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Создаем prompt в зависимости от навыка
     if skill == 'writing':
         prompt = (
-            f"Geef een realistische oefenopdracht voor het onderdeel 'schrijven' van het NT2 Staatsexamen B1-niveau. "
+            f"Geef een realistische oefenopdracht voor het onderdeel 'schrijven' van het NT2 Staatsexamen A2-niveau. "
             f"Het type opdracht moet zijn: '{writing_task_type}'. "
             f"Schrijf de opdracht duidelijk in het Nederlands. "
             "Gebruik moderne en relevante context. "
@@ -490,7 +490,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         role = "You are an NT2 writing exam trainer."
     elif skill == 'reading':
         prompt = (
-            "Geef een oefenopdracht voor het onderdeel 'lezen' op B1-niveau van het Staatsexamen NT2. "
+            "Geef een oefenopdracht voor het onderdeel 'lezen' op A2-niveau van het Staatsexamen NT2. "
             "Gebruik een korte tekst (maximaal 100 woorden) met 1-2 meerkeuzevragen. "
             "De context moet actueel of praktisch zijn (zoals werk, gemeente, school)."
             "Geef alleen de opdracht, geen voorbeeldantwoord."
@@ -498,7 +498,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         role = "You are an NT2 reading exam trainer."
     elif skill == 'speaking':
         prompt = (
-            "Geef een oefenopdracht voor het onderdeel 'spreken' op B1-niveau van het Staatsexamen NT2. "
+            "Geef een oefenopdracht voor het onderdeel 'spreken' op A2-niveau van het Staatsexamen NT2. "
             "Gebruik een realistische situatie (bijvoorbeeld werk, winkel, buren). "
             "Beschrijf wat de kandidaat moet zeggen of reageren."
             "Geef alleen de opdracht, geen voorbeeldantwoord."
@@ -509,7 +509,7 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             # "Geef een korte cultuurquiz of vraag over de Nederlandse samenleving, wetten of gewoonten, geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau."
             # "Geef alleen de vraag, geen antwoord."
             "Geef een korte cultuurquizvraag over de Nederlandse samenleving, wetten of gewoonten, "
-            "geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op B1-niveau. "
+            "geschikt voor iemand die zich voorbereidt op het inburgeringsexamen of NT2-examen op A2-niveau. "
             "De vraag moet vergezeld gaan van vier (4) meerkeuzeopties (A, B, C, D). "
             "Geef alleen de vraag en de opties, ZONDER het juiste antwoord te markeren of te vermelden. "
             "Formateer de opties duidelijk, bijvoorbeeld: 'A) Optie 1\\nB) Optie 2'."
@@ -688,21 +688,21 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 
         if exam_skill == 'writing':
             review_prompt = (
-                f"The user was given the following writing task for NT2 B1 level: "
+                f"The user was given the following writing task for NT2 A2 level: "
                 f"'{exam_task}'\n\n"
                 f"The user's response is: '{user_text}'\n\n"
-                "Please evaluate the user's response based on NT2 B1 writing exam criteria. "
+                "Please evaluate the user's response based on NT2 A2 writing exam criteria. "
                 "Focus on grammar, vocabulary, coherence, and task fulfillment. "
                 "Provide specific feedback in clear, concise Dutch, followed by a score from 1 to 10. "
                 "Also, point out 1-2 main areas for improvement. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
-            system_role = "You are a strict but fair NT2 B1 writing exam evaluator."
+            system_role = "You are a strict but fair NT2 A2 writing exam evaluator."
         elif exam_skill == 'reading':
             # Для чтения, если ответ - это просто выбор буквы, можно проверить напрямую.
             # Если ответ более сложный (например, объяснение), то это будет более "открытое" задание.
             review_prompt = (
-                f"The user was given the following reading comprehension task for NT2 B1 level: "
+                f"The user was given the following reading comprehension task for NT2 A2 level: "
                 f"'{exam_task}'\n\n"
                 f"The user's answer is: '{user_text}'\n\n"
                 "Please evaluate the user's answer. If it's a multiple choice, state if it's correct and why. "
@@ -710,23 +710,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 "Provide feedback in Dutch and a score from 1 to 10. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
-            system_role = "You are a precise NT2 B1 reading comprehension evaluator."
+            system_role = "You are a precise NT2 A2 reading comprehension evaluator."
         elif exam_skill == 'speaking':
             # Для говорения, поскольку мы получаем текст, нужно оценивать "транскрипцию"
             review_prompt = (
-                f"The user was given the following speaking task for NT2 B1 level: "
+                f"The user was given the following speaking task for NT2 A2 level: "
                 f"'{exam_task}'\n\n"
                 f"The user's spoken response (as transcribed text) is: '{user_text}'\n\n"
-                "Please evaluate this text as if it were a spoken answer for NT2 B1. "
+                "Please evaluate this text as if it were a spoken answer for NT2 A2. "
                 "Focus on fluency (as much as inferred from text), vocabulary, grammar, and pronunciation (if relevant in context). "
                 "Provide specific feedback in Dutch and a score from 1 to 10. "
                 "Point out 1-2 main areas for improvement. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
-            system_role = "You are an empathetic and constructive NT2 B1 speaking exam evaluator."
+            system_role = "You are an empathetic and constructive NT2 A2 speaking exam evaluator."
         elif exam_skill == 'culture':
             review_prompt = (
-                f"The user was given the following culture quiz/question for Dutch integration/NT2 B1 level: "
+                f"The user was given the following culture quiz/question for Dutch integration/NT2 A2 level: "
                 f"'{exam_task}'\n\n"
                 f"The user's answer is: '{user_text}'\n\n"
                 "Evaluate the user's answer for accuracy and completeness. "
