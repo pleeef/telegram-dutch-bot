@@ -693,7 +693,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 f"The user's response is: '{user_text}'\n\n"
                 "Please evaluate the user's response based on NT2 A2 writing exam criteria. "
                 "Focus on grammar, vocabulary, coherence, and task fulfillment. "
-                "Provide specific feedback in clear, concise Dutch, followed by a score from 1 to 10. "
+                "Provide specific feedback in English followed by a score from 1 to 10. "
                 "Also, point out 1-2 main areas for improvement. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
@@ -707,7 +707,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 f"The user's answer is: '{user_text}'\n\n"
                 "Please evaluate the user's answer. If it's a multiple choice, state if it's correct and why. "
                 "If it's an open question, assess its accuracy and completeness. "
-                "Provide feedback in Dutch and a score from 1 to 10. "
+                "Provide feedback in English and a score from 1 to 10. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
             system_role = "You are a precise NT2 A2 reading comprehension evaluator."
@@ -718,8 +718,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 f"'{exam_task}'\n\n"
                 f"The user's spoken response (as transcribed text) is: '{user_text}'\n\n"
                 "Please evaluate this text as if it were a spoken answer for NT2 A2. "
-                "Focus on fluency (as much as inferred from text), vocabulary, grammar, and pronunciation (if relevant in context). "
-                "Provide specific feedback in Dutch and a score from 1 to 10. "
+                "Focus on fluency (as much as inferred from text), vocabulary, grammar (if relevant in context). "
+                "Provide specific feedback in English and a score from 1 to 10. "
                 "Point out 1-2 main areas for improvement. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
@@ -730,7 +730,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 f"'{exam_task}'\n\n"
                 f"The user's answer is: '{user_text}'\n\n"
                 "Evaluate the user's answer for accuracy and completeness. "
-                "Provide the correct answer if needed. Give feedback in Dutch and a score from 1 to 10. "
+                "Provide the correct answer if needed. Give feedback in English and a score from 1 to 10. "
                 "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
             system_role = "You are an informative Dutch culture expert and exam evaluator."
