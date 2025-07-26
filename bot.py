@@ -6,6 +6,7 @@ import re
 import os
 import random # Для выбора случайных предлогов/глаголов/слов по умолчанию
 import string
+import csv
 
 # Настройте логирование, чтобы видеть, что происходит с ботом
 logging.basicConfig(
@@ -41,6 +42,18 @@ WRITING_TYPES = ['brief', 'verslag', 'formulier invullen', 'klacht indienen']
 
 # --- Список разрешенных навыков ---
 ALLOWED_SKILLS = ['reading', 'writing', 'speaking', 'culture']
+
+# Получаем путь к текущей директории, где находится bot.py
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Строим путь к файлу
+csv_path = os.path.join(BASE_DIR, "frequent_words_2000_5000.csv")
+
+# Читаем слова из CSV
+def load_words_from_csv(path):
+    with open(path, encoding="utf-8") as f:
+        reader = csv.reader(f)
+        return [row[0] for row in reader if row]
 
 # --- Проверка доступа ---
 def is_authorized(user_id):
@@ -271,21 +284,63 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     context.user_data['translation_level'] = level
     context.user_data['translation_style'] = style_code
 
-    def get_random_letter():
-        excluded = {'Q', 'X', 'Y', 'Z', 'W'}
-        allowed_letters = [letter for letter in string.ascii_uppercase if letter not in excluded]
-        return random.choice(allowed_letters)
+    # def get_random_letter():
+    #     excluded = {'Q', 'X', 'Y', 'Z', 'W'}
+    #     allowed_letters = [letter for letter in string.ascii_uppercase if letter not in excluded]
+    #     return random.choice(allowed_letters)
 
-    random_letter = get_random_letter()
+    # random_letter = get_random_letter()
+
+    # Получаем список слов
+    word_list = load_words_from_csv(csv_path)
+
+    # Получаем 3 случайных слова
+    random_words = random.sample(word_list, 3)
+
     
+    # prompts = {
+    #     #'A': (f"Generate a short, original text of three sentences in English in the style of Lewis Carroll's 'Through the Looking-Glass' (Alice in Wonderland part 2), suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+    #     #'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. No explanation, no quotation marks. Give only the sentences."),
+    #     'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. The **subject** (the main noun or character in each sentence) must begin with the letter '{random_letter}'. Other words can start with any letter. Avoid using alliteration. Try not to use the verb 'to dance'. No explanation, no quotation marks. Give only the sentences."),
+    #     #'N': (f"Generate a short, original text of three sentences in English in the style of Vladimir Nabokov's 'Invitation to a Beheading', suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+    #     'N': (f"Write a short, simple text in English (three sentences) using only {level}-level vocabulary and grammar. The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading' (not poetic). Avoid metaphors. The **subject** (the main noun or character in each sentence) must begin with the letter '{random_letter}'. Other words can start with any letter. Avoid using alliteration. No explanation, no quotation marks. Give only the sentences."),
+    #     'F': (f"Generate a short, original text of three sentences in English in the style of a modern fairytale or a young adult fantasy book. The sentences should be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+    #     'T': (f"Generate a short, original text of three sentences in English that describes a place or an event, as if it comes from a traveler's journal. The sentences should have a vivid but clear writing style and be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+    #     'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+    # }
     prompts = {
-        #'A': (f"Generate a short, original text of three sentences in English in the style of Lewis Carroll's 'Through the Looking-Glass' (Alice in Wonderland part 2), suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-        #'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. No explanation, no quotation marks. Give only the sentences."),
-        'A': (f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. Use short sentences and avoid complex grammar or puns. The **subject** (the main noun or character in each sentence) must begin with the letter '{random_letter}'. Other words can start with any letter. Avoid using alliteration. Try not to use the verb 'to dance'. No explanation, no quotation marks. Give only the sentences."),
-        #'N': (f"Generate a short, original text of three sentences in English in the style of Vladimir Nabokov's 'Invitation to a Beheading', suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-        'N': (f"Write a short, simple text in English (three sentences) using only {level}-level vocabulary and grammar. The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading' (not poetic). Avoid metaphors. The **subject** (the main noun or character in each sentence) must begin with the letter '{random_letter}'. Other words can start with any letter. Avoid using alliteration. No explanation, no quotation marks. Give only the sentences."),
-        'F': (f"Generate a short, original text of three sentences in English in the style of a modern fairytale or a young adult fantasy book. The sentences should be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
-        'T': (f"Generate a short, original text of three sentences in English that describes a place or an event, as if it comes from a traveler's journal. The sentences should have a vivid but clear writing style and be suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+        'A': (
+            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. "
+            f"Use short sentences and avoid complex grammar or puns. "
+            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+        ),
+        'N': (
+            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading', but simplified. "
+            f"Use short sentences and avoid complex grammar or puns. "
+            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+        ),
+        'F': (
+            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"The style of a modern fairytale or a young adult fantasy book. "
+            f"Use short sentences and avoid complex grammar or puns. "
+            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+        ),
+        'T': (
+            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"The style that describes a place or an event, as if it comes from a traveler's journal. "
+            f"Use short sentences and avoid complex grammar or puns. "
+            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+        ),
         'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
     }
 
