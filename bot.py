@@ -313,32 +313,40 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. "
             f"Use short sentences and avoid complex grammar or puns. "
-            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"Each sentence must express the meaning of one of the following Dutch words: "
             f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not include the Dutch words themselves in the sentences. "
+            f"Use only natural English words that match the meaning of each Dutch word."
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'N': (
             f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading', but simplified. "
             f"Use short sentences and avoid complex grammar or puns. "
-            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"Each sentence must express the meaning of one of the following Dutch words: "
             f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not include the Dutch words themselves in the sentences. "
+            f"Use only natural English words that match the meaning of each Dutch word."
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'F': (
             f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style of a modern fairytale or a young adult fantasy book. "
             f"Use short sentences and avoid complex grammar or puns. "
-            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"Each sentence must express the meaning of one of the following Dutch words: "
             f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not include the Dutch words themselves in the sentences. "
+            f"Use only natural English words that match the meaning of each Dutch word."
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'T': (
             f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style that describes a place or an event, as if it comes from a traveler's journal. "
             f"Use short sentences and avoid complex grammar or puns. "
-            f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
+            f"Each sentence must express the meaning of one of the following Dutch words: "
             f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
+            f"Do not include the Dutch words themselves in the sentences. "
+            f"Use only natural English words that match the meaning of each Dutch word."
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
