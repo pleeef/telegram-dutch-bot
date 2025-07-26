@@ -310,7 +310,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     # }
     prompts = {
         'A': (
-            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style should be playful and slightly absurd, similar to Lewis Carroll's 'Through the Looking-Glass', but simplified. "
             f"Use short sentences and avoid complex grammar or puns. "
             f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
@@ -318,7 +318,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'N': (
-            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style should resemble the absurd, minimal, and dry tone of Vladimir Nabokov's 'Invitation to a Beheading', but simplified. "
             f"Use short sentences and avoid complex grammar or puns. "
             f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
@@ -326,7 +326,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'F': (
-            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style of a modern fairytale or a young adult fantasy book. "
             f"Use short sentences and avoid complex grammar or puns. "
             f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
@@ -334,7 +334,7 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
             f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
         ),
         'T': (
-            f"Write a short, simple text in English (three sentences) using vocabulary and grammar at level {level}. "
+            f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
             f"The style that describes a place or an event, as if it comes from a traveler's journal. "
             f"Use short sentences and avoid complex grammar or puns. "
             f"Each sentence must incorporate one of the following Dutch words (or their English equivalents/concepts): "
