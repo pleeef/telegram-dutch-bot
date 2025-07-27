@@ -764,14 +764,23 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         elif exam_skill == 'reading':
             # Для чтения, если ответ - это просто выбор буквы, можно проверить напрямую.
             # Если ответ более сложный (например, объяснение), то это будет более "открытое" задание.
+            # review_prompt = (
+            #     f"The user was given the following reading comprehension task for NT2 A2 level: "
+            #     f"'{exam_task}'\n\n"
+            #     f"The user's answer is: '{user_text}'\n\n"
+            #     "Please evaluate the user's answer. If it's a multiple choice, state if it's correct and why. "
+            #     "If it's an open question, assess its accuracy and completeness. "
+            #     "Provide feedback in English and a score from 1 to 10. "
+            #     "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
+            # )
             review_prompt = (
-                f"The user was given the following reading comprehension task for NT2 A2 level: "
+                f"The user was given the following reading comprehension task for NT2 A2 level:\n"
                 f"'{exam_task}'\n\n"
-                f"The user's answer is: '{user_text}'\n\n"
-                "Please evaluate the user's answer. If it's a multiple choice, state if it's correct and why. "
-                "If it's an open question, assess its accuracy and completeness. "
-                "Provide feedback in English and a score from 1 to 10. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
+                f"The user's answer is:\n'{user_text}'\n\n"
+                "Please evaluate the user's answer. "
+                "If the answer is fully correct, simply say 'Correct' and give a score from 8 to 10 (depending on completeness). "
+                "If the answer is incorrect or incomplete, explain briefly why, and give a score from 1 to 7. "
+                "Keep feedback short and clear, in English."
             )
             system_role = "You are a precise NT2 A2 reading comprehension evaluator."
         elif exam_skill == 'speaking':
