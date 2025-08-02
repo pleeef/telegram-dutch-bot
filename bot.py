@@ -651,17 +651,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         #     "Your entire answer must be short and direct. "
         #     "End your response with a sentence like: 'Try a new translation with /translation [level] [style]!'."
         # )
+        # prompt = (
+        #     f"The original English text was: '{original_text}'. "
+        #     f"The user provided this translation: '{user_text}'. "
+        #     "Your task is to check the translation. "
+        #     "1. First, provide the correct Dutch translation of the text. "
+        #     "2. Then, provide a very brief and concise explanation of any errors in ENGLISH. "
+        #     "3. Finally, give a score from 1 to 10 based on the accuracy, grammar, word choice, and naturalness of the translation. "
+        #     "The score should be an estimate of how well the user captured the meaning and used correct Dutch. "
+        #     "Explain the score briefly in 1 sentence. "
+        #     "Your entire answer must be short and direct. "
+        #     "End your response with a sentence like: 'Try a new translation with /translation [level] [style]!'."
+        # )
         prompt = (
             f"The original English text was: '{original_text}'. "
             f"The user provided this translation: '{user_text}'. "
             "Your task is to check the translation. "
-            "1. First, provide the correct Dutch translation of the text. "
-            "2. Then, provide a very brief and concise explanation of any errors in ENGLISH. "
-            "3. Finally, give a score from 1 to 10 based on the accuracy, grammar, word choice, and naturalness of the translation. "
-            "The score should be an estimate of how well the user captured the meaning and used correct Dutch. "
+            "1. First, provide a correct Dutch translation (one natural version, not necessarily literal). "
+            "2. Then, briefly explain any clear grammar, meaning, or word choice issues in ENGLISH. "
+            "3. Finally, give a score from 1 to 10. Base the score on the **accuracy of meaning**, **grammatical correctness**, and **naturalness of the Dutch**, "
+            "but **do not penalize for valid synonyms or different phrasing if the translation is still correct and natural**. "
             "Explain the score briefly in 1 sentence. "
             "Your entire answer must be short and direct. "
-            "End your response with a sentence like: 'Try a new translation with /translation [level] [style]!'."
         )
 
         try:
@@ -710,7 +721,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "The score should be an estimate of how well the user captured the meaning and used correct Dutch. "
             "Explain the score briefly in 1 sentence. "
             "Your entire answer must be short and direct. "
-            "End your response with a clear instruction: 'Ready for the next set? Type /more or start a new practice session with /practice [level] [mode] [item]!'"
         )
 
         try:
@@ -758,7 +768,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 "Focus on grammar, vocabulary, coherence, and task fulfillment. "
                 "Provide specific feedback in English followed by a score from 1 to 10. "
                 "Also, point out 1-2 main areas for improvement. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
             system_role = "You are a strict but fair NT2 A2 writing exam evaluator."
         elif exam_skill == 'reading':
@@ -793,7 +802,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 "Focus on fluency (as much as inferred from text), vocabulary, grammar (if relevant in context). "
                 "Provide specific feedback in English and a score from 1 to 10. "
                 "Point out 1-2 main areas for improvement. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
             system_role = "You are an empathetic and constructive NT2 A2 speaking exam evaluator."
         elif exam_skill == 'culture':
@@ -803,7 +811,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                 f"The user's answer is: '{user_text}'\n\n"
                 "Evaluate the user's answer for accuracy and completeness. "
                 "Provide the correct answer if needed. Give feedback in English and a score from 1 to 10. "
-                "End your response with: 'Probeer een nieuw examen met /exam [vaardigheid]!'"
             )
             system_role = "You are an informative Dutch culture expert and exam evaluator."
 
