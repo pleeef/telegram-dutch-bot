@@ -670,7 +670,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             "1. First, provide a correct Dutch translation (one natural version, not necessarily literal). "
             "2. Then, briefly explain any clear grammar, meaning, or word choice issues in ENGLISH. "
             "3. Finally, give a score from 1 to 10. Base the score on the **accuracy of meaning**, **grammatical correctness**, and **naturalness of the Dutch**, "
-            "but **do not penalize for valid synonyms or different phrasing if the translation is still correct and natural**. "
+            "but **do not penalize for valid synonyms or different phrasing if the translation is still correct and natural**. Only give a score below 6 if the translation contains major errors that seriously affect clarity or correctness. "
             "Explain the score briefly in 1 sentence. "
             "Your entire answer must be short and direct. "
         )
