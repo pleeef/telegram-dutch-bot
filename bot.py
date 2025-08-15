@@ -205,6 +205,12 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Формируем строку даты
     random_date_str = today.strftime(f"%d %B {random_year}")
 
+    # Определяем список доступных голосов
+    voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+
+    # Выбираем случайный голос из списка
+    selected_voice = random.choice(voices)
+
     if topic == "today":
         if random_year <= today.year:
             # Реальная история
@@ -244,7 +250,7 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
             audio_response = openai.audio.speech.create(
                 model="gpt-4o-mini-tts",
-                voice="alloy",  # Можно поменять голос
+                voice=selected_voice,
                 input=reading_text
             )
             tmpfile.write(audio_response.read())
