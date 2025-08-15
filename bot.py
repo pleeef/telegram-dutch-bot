@@ -7,6 +7,7 @@ import os
 import random # Для выбора случайных предлогов/глаголов/слов по умолчанию
 import string
 import csv
+import datetime
 
 # Настройте логирование, чтобы видеть, что происходит с ботом
 logging.basicConfig(
@@ -194,8 +195,37 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if level not in valid_levels:
         await update.message.reply_text("Invalid level. Please use A1, A2, B1, B2, C1 or C2.")
         return
-        
-    prompt = f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} over het onderwerp '{topic}'."
+    
+    today = datetime.date.today()
+
+    # Случайный год от 500 до 2050
+    random_year = random.randint(500, 2050)
+
+    # Формируем строку даты
+    random_date_str = today.strftime(f"%d %B {random_year}")
+
+    if topic == "today":
+        if random_year <= today.year:
+            # Реальная история
+            prompt = (
+                f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} "
+                f"over een belangrijk historisch feit ergens in de wereld dat plaatsvond op {random_date_str} "
+                f"(dit kan overal plaatsvinden, bijvoorbeeld in Europa, Azië, Afrika, Amerika, enz.). "
+                f"Vertel wat er gebeurde en waarom het belangrijk was. "
+                f"Gebruik duidelijke taal die geschikt is voor taalleerders."
+            )
+        else:
+            # Фантастическое будущее
+            prompt = (
+                f"Schrijf een korte fantasierijke tekst (max 250 woorden) in het Nederlands op niveau {level} "
+                f"over een bijzonder of belangrijk toekomstig feit dat zal plaatsvinden op {random_date_str}. "
+                f"Verzin creatieve details, technologieën of gebeurtenissen die in die tijd zouden kunnen bestaan. "
+                f"Maak het verhaal boeiend maar eenvoudig genoeg voor taalleerders."
+            )
+    else:
+        prompt = f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} over het onderwerp '{topic}'."
+
+    # prompt = f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} over het onderwerp '{topic}'."
 
     try:
         response = openai.chat.completions.create(
