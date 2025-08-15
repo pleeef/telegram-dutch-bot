@@ -8,7 +8,6 @@ import random # Для выбора случайных предлогов/гла
 import string
 import csv
 import datetime
-import tempfile
 
 # Настройте логирование, чтобы видеть, что происходит с ботом
 logging.basicConfig(
@@ -229,7 +228,6 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # prompt = f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} over het onderwerp '{topic}'."
 
     try:
-        # text generation 
         response = openai.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -238,20 +236,8 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ],
             max_tokens=500,
         )
-        reading_text = response.choices[0].message.content.strip()
-
-        # audio generation 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
-            audio_response = openai.audio.speech.create(
-                model="gpt-4o-mini-tts",
-                voice="alloy",  # Можно поменять голос
-                input=reading_text
-            )
-            tmpfile.write(audio_response.read())
-            audio_path = tmpfile.name
-
-        await update.message.reply_text(f"Hier is een leestekst op niveau {level} over '{topic}':\n\n" + reading_text)
-        await update.message.reply_audio(audio=open(audio_path, "rb"))
+        reading_text_with_questions = response.choices[0].message.content.strip()
+        await update.message.reply_text(f"Hier is een leestekst op niveau {level} over '{topic}':\n\n" + reading_text_with_questions)
         logger.info(f"User {update.effective_user.id} requested a reading text: level {level}, topic {topic}.")
     except Exception as e:
         logger.error(f"Error in reading: {e}")
