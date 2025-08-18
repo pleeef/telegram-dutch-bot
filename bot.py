@@ -679,7 +679,12 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     try:
         # Генерируем предложение с помощью OpenAI API для указанного уровня
-        prompt = f"Genereer drie eenvoudige zinnen voor het dictee Nederlands voor niveau {level}. De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau."
+        prompt = f"""
+                    Genereer drie eenvoudige zinnen voor het dictee Nederlands voor niveau {level}. 
+                    ⚠️ Schrijf alleen de drie zinnen, elk op een nieuwe regel.
+                    ⚠️ Gebruik geen inleidende tekst, geen nummers, geen extra uitleg.
+                    De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau.
+                    """
         
         response = openai.chat.completions.create(
             model="gpt-4o",
@@ -869,7 +874,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         prompt = (
             f"The original dictation text was: '{correct_text_normalized}'. "
             f"The user provided this written text based on the dictation: '{user_text_normalized}'. "
-            f"Your task is to compare two texts. "
+            f"First send the original dictation text to user. "
+            f"Then your task is to compare two texts. "
             f"Check if the user's text is correct. If it is, respond with 'Correct!' "
             f"If it is incorrect, list all specific errors. Do not rewrite the sentence. Only list the differences. "
             f"Your entire answer must be short and direct. "
