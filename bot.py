@@ -858,7 +858,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             logger.error(f"Error in handle_message for practice mode: {e}")
             await update.message.reply_text("An error occurred while checking your answer. Please try again.")
     
-    elif mode == 'dictation':
+    elif mode == 'dictate':
         correct_text = context.user_data.get('dictation_text')
         
         # Очищаем режим перевода после проверки ответа
