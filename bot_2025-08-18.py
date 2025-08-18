@@ -48,8 +48,6 @@ ALLOWED_SKILLS = ['reading', 'writing', 'speaking', 'culture']
 # Получаем путь к текущей директории, где находится bot.py
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
-
 # Строим путь к файлу
 csv_path = os.path.join(BASE_DIR, "frequent_words_2000_5000.csv")
 
@@ -207,8 +205,11 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # Формируем строку даты
     random_date_str = today.strftime(f"%d %B {random_year}")
 
+    # Определяем список доступных голосов
+    voices = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
+
     # Выбираем случайный голос из списка
-    selected_voice = random.choice(VOICES)
+    selected_voice = random.choice(voices)
 
     if topic == "today":
         if random_year <= today.year:
@@ -655,68 +656,6 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(MSG_ERROR_OCCURRED)
 
 
-# НОВАЯ КОМАНДА dictate
-async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """
-    Запускает диктант, генерируя предложения для указанного уровня.
-    Использование: /dictate [уровень]
-    Пример: /dictate A1
-    """
-    if not is_authorized(update.effective_user.id):
-        return
-
-    # Получаем уровень из аргументов команды
-    if not context.args:
-        await update.message.reply_text("Пожалуйста, укажите уровень. Например: /dictate A1")
-        return
-        
-    level = context.args[0].upper()
-    
-    # Сохраняем режим "диктант"
-    context.user_data['mode'] = 'dictate'
-    
-    await update.message.reply_text(f"I will prepare a dictation for the level {level}. Listen carefully and write a sentence.")
-
-    try:
-        # Генерируем предложение с помощью OpenAI API для указанного уровня
-        prompt = f"Genereer drie eenvoudige zinnen voor het dictee Nederlands voor niveau {level}. De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau."
-        
-        response = openai.chat.completions.create(
-            model="gpt-4o",
-            messages=[
-                {"role": "system", "content": "You are a useful assistant in creating educational materials."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=50,
-        )
-        
-        sentence_to_dictate = response.choices[0].message.content.strip()
-        
-        # Сохраняем сгенерированное предложение
-        context.user_data['dictation_text'] = sentence_to_dictate
-        
-        # Выбираем случайный голос
-        selected_voice = random.choice(VOICES)
-        
-        # Генерируем аудиофайл
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
-            audio_response = openai.audio.speech.create(
-                model="gpt-4o-mini-tts",
-                voice=selected_voice,
-                input=sentence_to_dictate
-            )
-            tmpfile.write(audio_response.read())
-            audio_path = tmpfile.name
-
-        # Отправляем аудиофайл
-        await update.message.reply_audio(audio=open(audio_path, "rb"))
-        logger.info(f"User {update.effective_user.id} started the dictation level {level}.")
-    
-    except Exception as e:
-        logger.error(f"Error in dictate: {e}")
-        await update.message.reply_text("An error occurred while generating the dictation. Try again.")
-        context.user_data.clear() # Сбрасываем режим в случае ошибки
-
 # --- Обработчик текстовых сообщений ---
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает текстовые сообщения в режиме /chat, /roleplay, /translation или /practice."""
@@ -853,61 +792,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
             logger.error(f"Error in handle_message for practice mode: {e}")
             await update.message.reply_text("An error occurred while checking your answer. Please try again.")
     
-    elif mode == 'dictation':
-        correct_text = context.user_data.get('dictation_text')
-        
-        # Очищаем режим перевода после проверки ответа
-        context.user_data.clear() 
-
-        # if not correct_text:
-        #     await update.message.reply_text("An error occurred with the dictation. Please start over with /dictate.")
-        #     return
-
-        user_text_normalized = user_text.strip().lower()
-        correct_text_normalized = correct_text.strip().lower()
-
-        prompt = (
-            f"The original dictation text was: '{correct_text_normalized}'. "
-            f"The user provided this written text based on the dictation: '{user_text_normalized}'. "
-            f"Your task is to compare two texts. "
-            f"Check if the user's text is correct. If it is, respond with 'Correct!' "
-            f"If it is incorrect, list all specific errors. Do not rewrite the sentence. Only list the differences. "
-            f"Your entire answer must be short and direct. "
-        )
-
-        try:
-            response = openai.chat.completions.create(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a dictation checker for Dutch language learning bot."},
-                    {"role": "user", "content": prompt}
-                ],
-                max_tokens=400,
-            )
-            reply_text = response.choices[0].message.content.strip()
-            await update.message.reply_text(reply_text)
-            logger.info(f"User {update.effective_user.id} sent a message in dictate mode.")
-        except Exception as e:
-            logger.error(f"Error in handle_message for dictate mode: {e}")
-            await update.message.reply_text("An error occurred. Please try again.")
-
-        # if user_text_normalized == correct_text_normalized:
-        #     # Ответ правильный
-        #     await update.message.reply_text("Excellent! Your spelling is correct. ✅")
-        # else:
-        #     # Ответ неправильный
-        #     # Здесь можно добавить более подробный анализ ошибок
-        #     await update.message.reply_text(
-        #         f"Not quite right. 🤔\n"
-        #         f"Your answer: {user_text}\n"
-        #         f"Correct answer: {correct_text}\n"
-        #         f"Keep practicing! 🚀"
-        #     )
-
-        # # Сбрасываем режим диктанта, чтобы пользователь мог начать новый диалог или диктант
-        # user_data.clear()
-        # logger.info(f"User {update.effective_user.id} finished a dictation session.")
-    
     # --- НОВЫЙ БЛОК ДЛЯ РЕЖИМА EXAM ---
     elif mode == 'exam':
         exam_skill = context.user_data.get('exam_skill')
@@ -1017,7 +901,6 @@ def main() -> None:
     application.add_handler(CommandHandler("practice", practice))
     application.add_handler(CommandHandler("more", more))
     application.add_handler(CommandHandler("exam", exam))
-    application.add_handler(CommandHandler("dictate", dictate))
     
     # Обработчик для всех текстовых сообщений
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
