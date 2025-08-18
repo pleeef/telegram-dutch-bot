@@ -218,7 +218,7 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} "
                 f"over een belangrijk historisch feit ergens in de wereld dat plaatsvond op {random_date_str} "
                 f"(dit kan overal plaatsvinden, bijvoorbeeld in Europa, Azië, Afrika, Amerika, enz.). "
-                f"Vertel wat er gebeurde en waarom het belangrijk was. "
+                f"of over een beroemd persoon die op deze dag is geboren of over een boek dat in het gekozen jaar is gepubliceerd. "
                 f"Gebruik duidelijke taal die geschikt is voor taalleerders."
             )
         else:
