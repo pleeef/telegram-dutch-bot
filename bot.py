@@ -710,7 +710,9 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             ],
             max_tokens=50,
             temperature=0.9,
-            top_p=0.9
+            top_p=0.9,
+            presence_penalty=0.5, 
+            frequency_penalty=0.3
         )
         
         sentence_to_dictate = response.choices[0].message.content.strip()
