@@ -140,6 +140,8 @@ async def roleplay(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             model="gpt-4o",
             messages=context.user_data['messages'] + [{"role": "user", "content": prompt_start}],
             max_tokens=150,
+            temperature=0.9,
+            top_p=1.0
         )
         roleplay_start_text = response.choices[0].message.content.strip()
         context.user_data['messages'].append({"role": "assistant", "content": roleplay_start_text})
@@ -171,6 +173,8 @@ async def explain(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=300,
+            temperature=0.4,
+            top_p=0.9
         )
         explanation = response.choices[0].message.content.strip()
         await update.message.reply_text(explanation)
@@ -242,6 +246,8 @@ async def reading(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=500,
+            temperature=0.7,
+            top_p=0.95
         )
         reading_text = response.choices[0].message.content.strip()
 
@@ -290,6 +296,8 @@ async def word(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=500,
+            temperature=0.4,
+            top_p=0.9
         )
         word_info = response.choices[0].message.content.strip()
         await update.message.reply_text(word_info)
@@ -411,6 +419,8 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
                 {"role": "user", "content": prompt}
             ],
             max_tokens=150,
+            temperature=0.8,
+            top_p=0.96
         )
         text_to_translate = response.choices[0].message.content.strip()
         context.user_data['text_to_translate'] = text_to_translate
@@ -508,6 +518,8 @@ async def practice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             model="gpt-4o",
             messages=context.user_data['messages'],
             max_tokens=200,
+            temperature=0.6,
+            top_p=0.9
         )
         sentences_to_translate = response.choices[0].message.content.strip()
         context.user_data['current_practice_sentences'] = sentences_to_translate # Сохраняем предложения для проверки
@@ -636,6 +648,8 @@ async def exam(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=500,
+            temperature=0.6,
+            top_p=0.95
         )
         exam_task = response.choices[0].message.content.strip()
 
@@ -693,6 +707,8 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=50,
+            temperature=0.7,
+            top_p=0.9
         )
         
         sentence_to_dictate = response.choices[0].message.content.strip()
