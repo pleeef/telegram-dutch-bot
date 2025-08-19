@@ -698,6 +698,8 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     ⚠️ Schrijf alleen de drie zinnen, elk op een nieuwe regel.
                     ⚠️ Gebruik geen inleidende tekst, geen nummers, geen extra uitleg.
                     De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau.
+                    Vermijd herhaling van dezelfde thema's (bijvoorbeeld katten die slapen).
+                    Gebruik afwisseling in onderwerpen: mensen, school, werk, reizen, eten, hobby's, enz.
                     """
         
         response = openai.chat.completions.create(
@@ -707,7 +709,7 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 {"role": "user", "content": prompt}
             ],
             max_tokens=50,
-            temperature=0.7,
+            temperature=0.9,
             top_p=0.9
         )
         
