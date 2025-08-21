@@ -700,6 +700,12 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau.
                     Vermijd herhaling van dezelfde thema's (bijvoorbeeld katten die slapen).
                     Gebruik afwisseling in onderwerpen: mensen, school, werk, reizen, eten, hobby's, enz.
+                    
+                    ➡️ Richtlijnen per niveau:
+                    - Voor A2: gebruik korte en eenvoudige zinnen (6-10 woorden), in de tegenwoordige of toekomende tijd.
+                    - Voor B1: gebruik zinnen van vergelijkbare lengte (8-12 woorden), maar voeg een kort nevenschikkend of onderschikkend voegwoord toe (zoals "omdat", "maar", "want", "daarom", "als"). 
+                    Soms in de verleden tijd en met één of twee bijvoeglijke naamwoorden.
+                    - Voor B2: gebruik complexere zinnen met bijzinnen, voegwoorden en meer details (12-18 woorden).
                     """
         
         response = openai.chat.completions.create(
