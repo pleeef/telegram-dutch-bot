@@ -694,7 +694,7 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     try:
         # Генерируем предложение с помощью OpenAI API для указанного уровня
         prompt = f"""
-                    Genereer drie eenvoudige zinnen voor het dictee Nederlands voor niveau {level}. 
+                    Genereer twee eenvoudige zinnen voor het dictee Nederlands voor niveau {level}. 
                     ⚠️ Schrijf alleen de drie zinnen, elk op een nieuwe regel.
                     ⚠️ Gebruik geen inleidende tekst, geen nummers, geen extra uitleg.
                     De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau.
