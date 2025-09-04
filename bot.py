@@ -695,11 +695,17 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # Генерируем предложение с помощью OpenAI API для указанного уровня
         prompt = f"""
                     Genereer twee eenvoudige zinnen voor het dictee Nederlands voor niveau {level}. 
-                    ⚠️ Schrijf alleen de drie zinnen, elk op een nieuwe regel.
+                    ⚠️ Schrijf alleen de twee zinnen, elk op een nieuwe regel.
                     ⚠️ Gebruik geen inleidende tekst, geen nummers, geen extra uitleg.
                     De zinnen moeten vergelijkbaar zijn met die in de leerboeken voor dit niveau.
                     Vermijd herhaling van dezelfde thema's (bijvoorbeeld katten die slapen).
                     Gebruik afwisseling in onderwerpen: mensen, school, werk, reizen, eten, hobby's, enz.
+
+                    Richtlijnen algemeen:
+                    - Gebruik steeds verschillende werkwoorden in de zinnen (geen herhaling).
+                    - Zorg voor variatie in onderwerpen: mensen, school, werk, reizen, eten, hobby's, natuur, enz.
+                    - Kies regelmatig ook minder voor de hand liggende werkwoorden (bijv. bellen, brengen, zoeken, leren, wachten, spelen, kopen, schrijven, vergeten).
+                    - Vermijd herhaling van dezelfde thema's (bijvoorbeeld steeds katten of koken).
                     
                     ➡️ Richtlijnen per niveau:
                     - Voor A2: gebruik korte en eenvoudige zinnen (6-10 woorden), in de tegenwoordige of toekomende tijd.
