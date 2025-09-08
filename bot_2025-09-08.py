@@ -9,7 +9,6 @@ import string
 import csv
 import datetime
 import tempfile
-import json
 
 # Настройте логирование, чтобы видеть, что происходит с ботом
 logging.basicConfig(
@@ -53,62 +52,6 @@ VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 
 # Строим путь к файлу
 csv_path = os.path.join(BASE_DIR, "frequent_words_2000_5000.csv")
-
-MEMORY_FILE = os.path.join(BASE_DIR, "memory.json")
-
-# --- Работа с памятью ---
-def load_memory():
-    """Загружает память из файла."""
-    if os.path.exists(MEMORY_FILE):
-        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
-    # если файла нет, создаём пустую структуру
-    return {"dictate": {}, "translation": {}}
-
-def save_memory(memory):
-    """Сохраняет память в файл."""
-    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
-        json.dump(memory, f, ensure_ascii=False, indent=2)
-
-def get_recent_sentences(mode, days=7):
-    """
-    Возвращает все предложения за последние `days` дней для режима (dictate/translation).
-    """
-    memory = load_memory()
-    if mode not in memory:
-        return []
-
-    today = datetime.date.today()
-    result = []
-
-    for date_str, sentences in memory[mode].items():
-        try:
-            date_obj = datetime.date.fromisoformat(date_str)
-            if (today - date_obj).days <= days:
-                result.extend(sentences)
-        except ValueError:
-            continue  # если вдруг в памяти неправильная дата
-
-    return result
-
-def add_sentence(mode, sentence):
-    """
-    Добавляет предложение в память для текущего дня.
-    """
-    memory = load_memory()
-    today = str(datetime.date.today())
-
-    if mode not in memory:
-        memory[mode] = {}
-
-    if today not in memory[mode]:
-        memory[mode][today] = []
-
-    if sentence not in memory[mode][today]:  # избегаем дублей
-        memory[mode][today].append(sentence)
-
-    save_memory(memory)
-
 
 # Читаем слова из CSV
 def load_words_from_csv(path):
@@ -411,7 +354,6 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     # Получаем 3 случайных слова
     random_words = random.sample(word_list, 3)
 
-    recent_sentences = get_recent_sentences(context.user_data['mode'], days=7)
     
     # prompts = {
     #     #'A': (f"Generate a short, original text of three sentences in English in the style of Lewis Carroll's 'Through the Looking-Glass' (Alice in Wonderland part 2), suitable for translation to Dutch at level {level}. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
@@ -468,9 +410,6 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
     }
 
     prompt = prompts.get(style_code, prompts['L']) # Default to Learning style for translation
-    
-    if recent_sentences:
-        prompt += f"\n ⚠️ Do not repeat any of these sentences: {recent_sentences}"
 
     try:
         response = openai.chat.completions.create(
@@ -485,8 +424,6 @@ async def translation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
         )
         text_to_translate = response.choices[0].message.content.strip()
         context.user_data['text_to_translate'] = text_to_translate
-
-        add_sentence(context.user_data['mode'], text_to_translate)
         
         await update.message.reply_text(
             f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
@@ -751,7 +688,6 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     
     # Сохраняем режим "диктант"
     context.user_data['mode'] = 'dictate'
-    recent_sentences = get_recent_sentences(context.user_data['mode'], days=7)
     
     await update.message.reply_text(f"I will prepare a dictation for the level {level}. Listen carefully and write a sentence.")
 
@@ -777,9 +713,7 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                     Soms in de verleden tijd en met één of twee bijvoeglijke naamwoorden.
                     - Voor B2: gebruik complexere zinnen met bijzinnen, voegwoorden en meer details (12-18 woorden).
                     """
-        if recent_sentences:
-            prompt += f"\n ⚠️ Do not repeat any of these sentences: {recent_sentences}"
-
+        
         response = openai.chat.completions.create(
             model="gpt-4o",
             messages=[
@@ -797,8 +731,6 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         
         # Сохраняем сгенерированное предложение
         context.user_data['dictation_text'] = sentence_to_dictate
-
-        add_sentence(context.user_data['mode'], sentence_to_dictate)
         
         # Выбираем случайный голос
         selected_voice = random.choice(VOICES)
