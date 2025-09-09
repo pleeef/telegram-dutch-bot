@@ -1004,7 +1004,7 @@ async def learnwords(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
     if not is_authorized(update.effective_user.id):
         return
 
-    context.user_data.clear()
+    # context.user_data.clear()
     context.user_data["mode"] = "learnwords"
 
     # формируем список задач
