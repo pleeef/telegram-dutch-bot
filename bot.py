@@ -101,14 +101,25 @@ def prepare_learnwords_tasks(daily_words):
             })
         else:
             # Три отдельных задачи по одному предложению
+            # for _ in range(3):
+            #     sentence = generate_sentence(word)
+            #     while sentence in seen_sentences:  # чтобы не повторяться
+            #         sentence = generate_sentence(word)
+            #     seen_sentences.add(sentence)
+            #     tasks.append({
+            #         "word": word,
+            #         "sentences": [sentence],
+            #         "is_verb": False
+            #     })
             for _ in range(3):
-                sentence = generate_sentence(word)
-                while sentence in seen_sentences:  # чтобы не повторяться
-                    sentence = generate_sentence(word)
-                seen_sentences.add(sentence)
+                ex = generate_sentence(word)
+                # проверяем по тексту предложения
+                while ex["sentence"] in seen_sentences:
+                    ex = generate_sentence(word)
+                seen_sentences.add(ex["sentence"])
                 tasks.append({
                     "word": word,
-                    "sentences": [sentence],
+                    "sentences": [ex],
                     "is_verb": False
                 })
 
