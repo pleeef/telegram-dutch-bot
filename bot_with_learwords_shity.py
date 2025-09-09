@@ -56,6 +56,168 @@ csv_path = os.path.join(BASE_DIR, "frequent_words_2000_5000.csv")
 
 MEMORY_FILE = os.path.join(BASE_DIR, "memory.json")
 
+WORD_MEMORY_FILE = os.path.join(BASE_DIR, "word_memory.json")
+
+def load_word_memory():
+    if os.path.exists(WORD_MEMORY_FILE):
+        with open(WORD_MEMORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def save_word_memory(memory):
+    with open(WORD_MEMORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(memory, f, ensure_ascii=False, indent=2)
+
+def select_daily_words(n_new=5, n_wrong=10, n_good=5):
+    word_memory = load_word_memory()
+    all_words = load_words_from_csv(csv_path)
+
+    # Новые слова (не в памяти)
+    new_words = [w for w in all_words if w not in word_memory]
+    selected_new = random.sample(new_words, min(n_new, len(new_words)))
+
+    # Слова с низким процентом (<70%)
+    wrong_candidates = [w for w, stats in word_memory.items() if stats["shown"] > 0 and (stats["correct"]/stats["shown"]) < 0.7]
+    selected_wrong = random.sample(wrong_candidates, min(n_wrong, len(wrong_candidates)))
+
+    # Слова с высоким процентом (>=70%)
+    good_candidates = [w for w, stats in word_memory.items() if stats["shown"] > 0 and (stats["correct"]/stats["shown"]) >= 0.7]
+    selected_good = random.sample(good_candidates, min(n_good, len(good_candidates)))
+
+    return selected_new + selected_wrong + selected_good
+
+def prepare_learnwords_tasks(daily_words):
+    tasks = []
+    seen_sentences = set()
+
+    for word in daily_words:
+        if is_verb(word):  # нужна функция-детектор глагола
+            # Одна задача = три предложения (present + 2x past)
+            sentences = generate_sentences(word, verb=True)
+            tasks.append({
+                "word": word,
+                "sentences": sentences,
+                "is_verb": True
+            })
+        else:
+            # Три отдельных задачи по одному предложению
+            # for _ in range(3):
+            #     sentence = generate_sentence(word)
+            #     while sentence in seen_sentences:  # чтобы не повторяться
+            #         sentence = generate_sentence(word)
+            #     seen_sentences.add(sentence)
+            #     tasks.append({
+            #         "word": word,
+            #         "sentences": [sentence],
+            #         "is_verb": False
+            #     })
+            for _ in range(3):
+                ex = generate_sentence(word)
+                # проверяем по тексту предложения
+                while ex["sentence"] in seen_sentences:
+                    ex = generate_sentence(word)
+                seen_sentences.add(ex["sentence"])
+                tasks.append({
+                    "word": word,
+                    "sentences": [ex],
+                    "is_verb": False
+                })
+
+    random.shuffle(tasks)  # перемешиваем, чтобы слово не шло подряд
+    return tasks
+
+def is_verb(word: str) -> bool:
+    """
+    Определяет, является ли слово голландским глаголом, с помощью AI (возвращает True/False).
+    """
+    prompt = f"""
+    Determine if the Dutch word "{word}" is a verb (in infinitive form).
+    Answer only "true" or "false".
+    """
+
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "system", "content": "You are a Dutch linguist."},
+                      {"role": "user", "content": prompt}],
+            max_tokens=5,
+            temperature=0
+        )
+        result = response.choices[0].message.content.strip().lower()
+        return result.startswith("true")
+    except Exception:
+        return False
+
+def generate_sentence(word: str):
+    """
+    Генерирует одно предложение с пропущенным словом.
+    Возвращает dict: {"sentence": "...", "missing": "...", "translation": "...", "hint": "..."}
+    """
+    prompt = f"""
+    Generate one simple Dutch sentence with the word "{word}".
+    Replace "{word}" with "____".
+    Provide also:
+    - the correct missing word
+    - English translation of the full sentence
+    - hint (e.g., "noun, singular")
+    Format as JSON: {{"sentence": "...", "missing": "...", "translation": "...", "hint": "..."}}.
+    """
+
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "system", "content": "You are a Dutch teacher."},
+                  {"role": "user", "content": prompt}],
+        max_tokens=200,
+        temperature=0.7
+    )
+    try:
+        return json.loads(response.choices[0].message.content.strip())
+    except Exception:
+        # fallback, если GPT ответил странно
+        return {
+            "sentence": f"Ik zie een ____ in de kamer.",
+            "missing": word,
+            "translation": f"I see a {word} in the room.",
+            "hint": "noun"
+        }
+
+def generate_sentences(word: str, verb=True):
+    """
+    Генерирует три предложения для глагола:
+    - настоящее время
+    - прошедшее простое (ovt)
+    - перфект (voltooid deelwoord, с 'hebben' или 'zijn')
+    """
+    prompt = f"""
+    Generate three simple Dutch sentences with the verb "{word}".
+    1) Present tense (3rd person singular)
+    2) Past simple (ovt)
+    3) Perfect tense (voltooid deelwoord)
+    In each sentence replace the target verb with "____".
+    Provide JSON list of 3 objects, each with:
+    - sentence
+    - missing (correct form of the verb)
+    - translation (English)
+    - hint (e.g., "verb, present")
+    """
+
+    response = openai.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "system", "content": "You are a Dutch teacher."},
+                  {"role": "user", "content": prompt}],
+        max_tokens=300,
+        temperature=0.7
+    )
+    try:
+        return json.loads(response.choices[0].message.content.strip())
+    except Exception:
+        # fallback пример
+        return [
+            {"sentence": f"Hij ____ elke dag.", "missing": word, "translation": f"He {word}s every day.", "hint": "verb, present"},
+            {"sentence": f"Hij ____ gisteren.", "missing": word, "translation": f"He {word} yesterday.", "hint": "verb, past"},
+            {"sentence": f"Hij heeft ____.", "missing": word, "translation": f"He has {word}.", "hint": "verb, perfect"}
+        ]
+
 # --- Работа с памятью ---
 def load_memory():
     """Загружает память из файла."""
@@ -822,6 +984,82 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text("An error occurred while generating the dictation. Try again.")
         context.user_data.clear() # Сбрасываем режим в случае ошибки
 
+
+async def present_learnword(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    tasks = context.user_data.get("learnwords_tasks", [])
+    idx = context.user_data.get("task_index", 0)
+
+    if idx >= len(tasks):
+        await update.message.reply_text("✅ Lesson finished! Great work! 🎉")
+        context.user_data.clear()
+        return
+
+    task = tasks[idx]
+    context.user_data["current_task"] = task
+
+    if task["is_verb"]:
+        msg = "\n".join([
+            f"{s['sentence']}\nTranslation: {s['translation']}\nHint: {s['hint']}"
+            for s in task["sentences"]
+        ])
+        await update.message.reply_text(
+            f"Fill in all three forms of '{task['word']}' (present, past, past).\n\n{msg}"
+        )
+    else:
+        s = task["sentences"][0]
+        await update.message.reply_text(
+            f"{s['sentence']}\n\nTranslation: {s['translation']}\nHint: {s['hint']}"
+        )
+
+# async def learnwords(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#     if not is_authorized(update.effective_user.id):
+#         return
+
+#     # context.user_data.clear()
+#     context.user_data["mode"] = "learnwords"
+
+#     # формируем список задач
+#     daily_words = select_daily_words()
+#     tasks = prepare_learnwords_tasks(daily_words)
+
+#     context.user_data["learnwords_tasks"] = tasks
+#     context.user_data["task_index"] = 0
+
+#     await update.message.reply_text("📘 Let's start! 20 words today.")
+#     await present_learnword(update, context)
+
+
+async def learnwords(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not is_authorized(update.effective_user.id):
+        return
+
+    # Не очищаем user_data, чтобы не терять отладочную информацию
+    try:
+        context.user_data["mode"] = "learnwords"
+        # 1) Выбор слов на день
+        daily_words = select_daily_words()
+        logger.info(f"/learnwords daily_words: {daily_words}")
+        # Показать список слов прямо в чате для пошаговой диагностики
+        await update.message.reply_text(
+            f"🧪 daily_words ({len(daily_words)}): " + ", ".join(map(str, daily_words))
+        )
+        # 2) Подготовка задач
+        tasks = prepare_learnwords_tasks(daily_words)
+        logger.info(f"/learnwords tasks prepared: {len(tasks)}")
+        # Сообщим, сколько задач подготовлено
+        await update.message.reply_text(f"🧪 tasks prepared: {len(tasks)}")
+        # 3) Сохранение состояния сессии и старт урока
+        context.user_data["learnwords_tasks"] = tasks
+        context.user_data["task_index"] = 0
+
+        await update.message.reply_text("📘 Let's start! 20 words today.")
+        await present_learnword(update, context)
+    except Exception as e:
+        # Поймаем и выведем ошибку, чтобы не было "тихих" падений
+        logger.error(f"Error in learnwords: {e}", exc_info=True)
+        await update.message.reply_text(f"⚠️ Error in /learnwords: {e}")
+
+
 # --- Обработчик текстовых сообщений ---
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Обрабатывает текстовые сообщения в режиме /chat, /roleplay, /translation или /practice."""
@@ -1013,7 +1251,39 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
         # # Сбрасываем режим диктанта, чтобы пользователь мог начать новый диалог или диктант
         # user_data.clear()
         # logger.info(f"User {update.effective_user.id} finished a dictation session.")
-    
+    elif mode == "learnwords":
+        task = context.user_data.get("current_task")
+        word_memory = load_word_memory()
+
+        if not task:
+            await update.message.reply_text("Session error. Try /learnwords again.")
+            return
+
+        if task["is_verb"]:
+            user_answers = re.split(r"[, ]+", update.message.text.strip().lower())
+            correct_answers = [s["missing"].lower() for s in task["sentences"]]
+            correct = all(u == c for u, c in zip(user_answers, correct_answers))
+        else:
+            user_answer = update.message.text.strip().lower()
+            correct = user_answer == task["sentences"][0]["missing"].lower()
+
+        # обновляем статистику
+        w = task["word"]
+        if w not in word_memory:
+            word_memory[w] = {"shown": 0, "correct": 0}
+        word_memory[w]["shown"] += 1
+        if correct:
+            word_memory[w]["correct"] += 1
+            await update.message.reply_text(f"✅ Correct! {w}")
+        else:
+            await update.message.reply_text(f"❌ Wrong. Correct: {', '.join([s['missing'] for s in task['sentences']])}")
+
+        save_word_memory(word_memory)
+
+        # следующий
+        context.user_data["task_index"] += 1
+        await present_learnword(update, context)
+
     # --- НОВЫЙ БЛОК ДЛЯ РЕЖИМА EXAM ---
     elif mode == 'exam':
         exam_skill = context.user_data.get('exam_skill')
@@ -1124,6 +1394,7 @@ def main() -> None:
     application.add_handler(CommandHandler("more", more))
     application.add_handler(CommandHandler("exam", exam))
     application.add_handler(CommandHandler("dictate", dictate))
+    application.add_handler(CommandHandler("learnwords", learnwords))
     
     # Обработчик для всех текстовых сообщений
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
