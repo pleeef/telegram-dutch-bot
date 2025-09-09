@@ -1000,22 +1000,53 @@ async def present_learnword(update: Update, context: ContextTypes.DEFAULT_TYPE):
             f"{s['sentence']}\n\nTranslation: {s['translation']}\nHint: {s['hint']}"
         )
 
+# async def learnwords(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+#     if not is_authorized(update.effective_user.id):
+#         return
+
+#     # context.user_data.clear()
+#     context.user_data["mode"] = "learnwords"
+
+#     # формируем список задач
+#     daily_words = select_daily_words()
+#     tasks = prepare_learnwords_tasks(daily_words)
+
+#     context.user_data["learnwords_tasks"] = tasks
+#     context.user_data["task_index"] = 0
+
+#     await update.message.reply_text("📘 Let's start! 20 words today.")
+#     await present_learnword(update, context)
+
+
 async def learnwords(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not is_authorized(update.effective_user.id):
         return
 
-    # context.user_data.clear()
-    context.user_data["mode"] = "learnwords"
+    # Не очищаем user_data, чтобы не терять отладочную информацию
+    try:
+        context.user_data["mode"] = "learnwords"
+        # 1) Выбор слов на день
+        daily_words = select_daily_words()
+        logger.info(f"/learnwords daily_words: {daily_words}")
+        # Показать список слов прямо в чате для пошаговой диагностики
+        await update.message.reply_text(
+            f"🧪 daily_words ({len(daily_words)}): " + ", ".join(map(str, daily_words))
+        )
+        # 2) Подготовка задач
+        tasks = prepare_learnwords_tasks(daily_words)
+        logger.info(f"/learnwords tasks prepared: {len(tasks)}")
+        # Сообщим, сколько задач подготовлено
+        await update.message.reply_text(f"🧪 tasks prepared: {len(tasks)}")
+        # 3) Сохранение состояния сессии и старт урока
+        context.user_data["learnwords_tasks"] = tasks
+        context.user_data["task_index"] = 0
 
-    # формируем список задач
-    daily_words = select_daily_words()
-    tasks = prepare_learnwords_tasks(daily_words)
-
-    context.user_data["learnwords_tasks"] = tasks
-    context.user_data["task_index"] = 0
-
-    await update.message.reply_text("📘 Let's start! 20 words today.")
-    await present_learnword(update, context)
+        await update.message.reply_text("📘 Let's start! 20 words today.")
+        await present_learnword(update, context)
+    except Exception as e:
+        # Поймаем и выведем ошибку, чтобы не было "тихих" падений
+        logger.error(f"Error in learnwords: {e}", exc_info=True)
+        await update.message.reply_text(f"⚠️ Error in /learnwords: {e}")
 
 
 # --- Обработчик текстовых сообщений ---
