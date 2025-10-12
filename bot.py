@@ -740,11 +740,16 @@ async def dictate(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     Пример: /dictate A1
     """
     topics_numbers = [
-    "tijd en klok",           # время и часы
-    "datums en dagen",        # даты и дни недели
-    "prijzen en geld",        # цены и деньги
-    "telefoonnummers",        # телефонные номера
-    "huisnummers en adressen" # номера домов и адреса
+    "tijd en klok",              # время и часы
+    "datums en dagen",           # даты и дни недели
+    "prijzen en geld",           # цены и деньги
+    "telefoonnummers",           # телефонные номера
+    "huisnummers en adressen",   # номера домов и адреса
+    "jaren en leeftijden",       # годы и возраст
+    "temperaturen en weer",      # температура и погода
+    "afstand en snelheid",       # расстояние и скорость
+    "hoeveelheden en gewicht",   # количество и вес
+    "pagina's en nummers",       # номера страниц, билетов, мест
     ]
 
     topics_n = random.choice(topics_numbers)
