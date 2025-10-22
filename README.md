@@ -21,6 +21,7 @@ An interactive Telegram bot for practicing Dutch — integrates OpenAI GPT-4o to
 - **Railway.app** for deployment
 
 ## 🧩 Project Structure
+```
 core/
 ├── app.py           # main application class
 ├── handlers/        # all command handlers
@@ -30,18 +31,22 @@ data/
 └── memory.json      # user progress (local only)
 config.py             # environment setup
 bot.py                # entry point
+```
 
 ## ⚙️ Running locally
 1. Create a virtual environment:
    ```bash
    python -m venv venv && source venv/bin/activate
 2.	Install dependencies:
+    ```bash
     pip install -r requirements.txt
 3.	Create a .env file:
+    ```bash
     TELEGRAM_TOKEN=your_token
     OPENAI_API_KEY=your_key
     AUTHORIZED_USERS=123456789
 4.	Run:
+    ```bash
     python bot.py
 
 🚀 Deployment
