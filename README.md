@@ -29,8 +29,8 @@ core/
 └── openai_client.py # OpenAI wrapper
 data/
 └── memory.json      # user progress (local only)
-config.py             # environment setup
-bot.py                # entry point
+config.py            # environment setup
+bot.py               # entry point
 ```
 
 ## ⚙️ Running locally
