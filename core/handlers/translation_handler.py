@@ -180,7 +180,7 @@ class TranslationHandler:
                     {"role": "system", "content": "You are a friendly Dutch teacher."},
                     {"role": "user", "content": feedback_prompt},
                 ],
-                max_tokens=150,
+                max_tokens=300,
                 temperature=0.5,
             )
 
