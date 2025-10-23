@@ -127,7 +127,7 @@ class TranslationHandler:
                 top_p=0.96
             )
             text_to_translate = response.choices[0].message.content.strip()
-            text_to_send= f"The words we are practicing are: '{random_words[0]}', '{random_words[1]}', '{random_words[2]}'.\n" + text_to_translate
+            text_to_send= f"The words we are practicing are: '{random_words[0]}', '{random_words[1]}', '{random_words[2]}'.\n\n" + text_to_translate
             context.user_data['text_to_translate'] = text_to_translate
 
             self.memory.add_sentence(context.user_data['mode'], text_to_translate)
