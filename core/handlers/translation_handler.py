@@ -127,11 +127,21 @@ class TranslationHandler:
                 top_p=0.96
             )
             text_to_translate = response.choices[0].message.content.strip()
-            text_to_send= f"The words we are practicing are: '{random_words[0]}', '{random_words[1]}', '{random_words[2]}'.\n\n" + text_to_translate
             context.user_data['text_to_translate'] = text_to_translate
 
             self.memory.add_sentence(context.user_data['mode'], text_to_translate)
             
+            response = self.openai.chat_completion(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": "You are a helpful Dutch language teacher."},
+                    {"role": "user", "content": f"Give translation to English for this words: '{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. use format:  '{random_words[0]}' - translation, '{random_words[1]}' - translation, '{random_words[2]}' - translation, that's all. "}
+                ],
+                max_tokens=50
+            )
+            words_translation = response.choices[0].message.content.strip()
+            text_to_send= f"The words we are practicing are: {words_translation}.\n\n" + text_to_translate
+
             await update.message.reply_text(
                 f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
                 f"**{text_to_send}**"
