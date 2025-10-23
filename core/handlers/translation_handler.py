@@ -127,13 +127,14 @@ class TranslationHandler:
                 top_p=0.96
             )
             text_to_translate = response.choices[0].message.content.strip()
+            text_to_send= f"The words we are practicing are: '{random_words[0]}', '{random_words[1]}', '{random_words[2]}'.\n" + text_to_translate
             context.user_data['text_to_translate'] = text_to_translate
 
             self.memory.add_sentence(context.user_data['mode'], text_to_translate)
             
             await update.message.reply_text(
                 f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
-                f"**{text_to_translate}**"
+                f"**{text_to_send}**"
             )
             logger.info(f"User {update.effective_user.id} started a translation task. Level: {level}, Style: {style_code}, Topic: {topic}.")
         except Exception as e:
