@@ -140,7 +140,7 @@ class TranslationHandler:
                 max_tokens=50
             )
             words_translation = response.choices[0].message.content.strip()
-            text_to_send= f"The words we are practicing are: {words_translation}.\n\n" + text_to_translate
+            text_to_send= f"💡 The words we are practicing are: {words_translation}.\n\n" + text_to_translate
 
             await update.message.reply_text(
                 f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
