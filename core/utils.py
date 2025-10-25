@@ -13,4 +13,5 @@ def generate_random_date_str(start_year=1700, end_year=2030) -> tuple[str, int]:
     today = datetime.date.today()
     random_year = random.randint(start_year, end_year)
     random_date_str = today.strftime(f"%d %B {random_year}")
-    return random_date_str, random_year
+    current_year = today.year
+    return random_date_str, random_year, current_year

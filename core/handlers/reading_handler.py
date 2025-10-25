@@ -44,10 +44,10 @@ class ReadingHandler:
 
         context.user_data['reading'] = level
 
-        random_date_str, random_year = generate_random_date_str()
+        random_date_str, random_year, current_year = generate_random_date_str()
 
         if topic == "today":
-            if random_year <= today.year:
+            if random_year <= current_year:
                 # Real fact from history
                 prompt = (
                     f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} "
