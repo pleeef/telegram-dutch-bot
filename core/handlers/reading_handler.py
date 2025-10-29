@@ -1,7 +1,7 @@
 from telegram import Update, ForceReply
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from config import AUTHORIZED_USERS, VALID_LEVELS, VOICES
-from core.utils import generate_random_date_str
+from config import AUTHORIZED_USERS, VALID_LEVELS, VOICES, TEXTS_FILE
+from core.utils import generate_random_date_str, get_random_text_only
 import logging, random, datetime
 
 
@@ -80,7 +80,10 @@ class ReadingHandler:
                 top_p=0.95
             )
 
-            reading_text = response.choices[0].message.content.strip()
+            if topic == 'story':
+                reading_text = get_random_text_only(TEXTS_FILE)
+            else:
+                reading_text = response.choices[0].message.content.strip()
         
             # Save the generated sentence
             context.user_data['reading_text'] = reading_text

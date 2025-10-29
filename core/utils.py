@@ -1,4 +1,4 @@
-import csv, datetime, random
+import csv, datetime, random, json
 
 def load_words_from_csv(path):
     with open(path, encoding="utf-8") as f:
@@ -15,3 +15,8 @@ def generate_random_date_str(start_year=1700, end_year=2030) -> tuple[str, int]:
     random_date_str = today.strftime(f"%d %B {random_year}")
     current_year = today.year
     return random_date_str, random_year, current_year
+
+def get_random_text_only(path):
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    return random.choice(data)["text"]
