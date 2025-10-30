@@ -1,7 +1,7 @@
 from telegram import Update, ForceReply
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from config import AUTHORIZED_USERS, VALID_LEVELS, VOICES, TEXTS_FILE
-from core.utils import generate_random_date_str, get_random_text_only
+from config import AUTHORIZED_USERS, VALID_LEVELS, VOICES, TEXTS_FILE, MEDIA_FILE
+from core.utils import generate_random_date_str, get_random_text_only, get_random_media
 import logging, random, datetime
 
 
@@ -46,6 +46,8 @@ class ReadingHandler:
 
         random_date_str, random_year, current_year = generate_random_date_str()
 
+        title, media_type = get_random_media(MEDIA_FILE)
+
         if topic == "today":
             if random_year <= current_year:
                 # Real fact from history
@@ -64,6 +66,8 @@ class ReadingHandler:
                     f"Verzin creatieve details, technologieën of gebeurtenissen die in die tijd zouden kunnen bestaan. "
                     f"Maak het verhaal boeiend maar eenvoudig genoeg voor taalleerders."
                 )
+        elif topic == "media":
+            prompt = f"Schrijf een korte tekst op niveau {level} over {media_type} '{title}'."
         else:
             prompt = f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} over het onderwerp '{topic}'."
 

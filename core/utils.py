@@ -20,3 +20,8 @@ def get_random_text_only(path):
     with open(path, encoding="utf-8") as f:
         data = json.load(f)
     return random.choice(data)["text"]
+
+def get_random_media(path):
+    df = pd.read_csv(path)
+    row = df.sample(1).iloc[0]
+    return row["title"], row["type"]
