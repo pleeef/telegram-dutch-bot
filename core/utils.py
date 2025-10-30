@@ -1,4 +1,4 @@
-import pandas as pd, csv, datetime, random, json
+import csv, datetime, random, json
 
 def load_words_from_csv(path):
     with open(path, encoding="utf-8") as f:
@@ -22,6 +22,9 @@ def get_random_text_only(path):
     return random.choice(data)["text"]
 
 def get_random_media(path):
-    df = pd.read_csv(path)
-    row = df.sample(1).iloc[0]
+    with open(path, encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        rows = list(reader)
+
+    row = random.choice(rows)
     return row["title"], row["type"]
