@@ -224,7 +224,7 @@ class TranslationHandler:
             reply_to_send_x = dedent(f"""
                                 🎯 Original sentences:
 
-                                { "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_en)]) }
+                                { "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_nl)]) }
                             """).strip()
 
             if style_code == 'X':
