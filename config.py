@@ -36,7 +36,7 @@ NUMBERS = [
     ]
 
 
-VALID_STYLES = ['A', 'N', 'F', 'T', 'L']
+VALID_STYLES = ['A', 'N', 'F', 'T', 'L', 'X']
 
 TRANSLATION_STYLE_NAMES = {
     'A': 'Alice',
