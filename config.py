@@ -16,6 +16,7 @@ MEMORY_FILE = os.path.join(DATA_DIR, "memory.json")
 WORDS_FILE = os.path.join(DATA_DIR, "frequent_words_2000_5000.csv")
 TEXTS_FILE = os.path.join(DATA_DIR, "texts.json")
 MEDIA_FILE = os.path.join(DATA_DIR, "media_list.csv")
+SENTENSES_FILE = os.path.join(DATA_DIR, "words_enriched.json")
 
 VOICES = ["alloy", "echo", "fable", "onyx", "nova", "shimmer"]
 VALID_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2']

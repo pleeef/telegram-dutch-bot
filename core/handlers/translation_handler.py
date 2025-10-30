@@ -1,7 +1,7 @@
 from telegram import Update, ForceReply
 from telegram.ext import ContextTypes, CommandHandler, MessageHandler, filters
-from config import AUTHORIZED_USERS, WORDS_FILE, VALID_LEVELS, VALID_STYLES
-from core.utils import load_words_from_csv
+from config import AUTHORIZED_USERS, WORDS_FILE, VALID_LEVELS, VALID_STYLES, SENTENSES_FILE
+from core.utils import load_words_from_csv, get_sentenses_from_json
 import logging
 import random
 
@@ -65,6 +65,13 @@ class TranslationHandler:
 
         recent_sentences = self.memory.get_recent_sentences(context.user_data['mode'])
         
+        word, word_translation_en, example_sentences_en, example_sentences_nl = get_sentenses_from_json(SENTENSES_FILE, level)
+
+        message_to_send_x = f"""🎯 Focus word: **{word}** ({word_translation_en})
+
+                                Translate the following sentences into Dutch and try to use **{word}**:
+
+                                """ + "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_en)])
 
         prompts = {
             'A': (
@@ -142,10 +149,13 @@ class TranslationHandler:
             words_translation = response.choices[0].message.content.strip()
             text_to_send= f"💡 The words we are practicing are: {words_translation}.\n\n" + text_to_translate
 
-            await update.message.reply_text(
-                f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
-                f"**{text_to_send}**"
-            )
+            if style_code == 'X':
+                await update.message.reply_text(message_to_send_x)
+            else:
+                await update.message.reply_text(
+                    f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
+                    f"**{text_to_send}**"
+                )
             logger.info(f"User {update.effective_user.id} started a translation task. Level: {level}, Style: {style_code}, Topic: {topic}.")
         except Exception as e:
             logger.error(f"Error in translation start: {e}")
@@ -161,6 +171,9 @@ class TranslationHandler:
 
         user_translation = update.message.text.strip()
         original_text = context.user_data.get("text_to_translate")
+
+        style_code = context.user_data.get("translation_style")
+        level = context.user_data.get("translation_level")
 
         if not original_text:
             await update.message.reply_text("Please start with /translation first.")
@@ -196,7 +209,20 @@ class TranslationHandler:
             )
 
             feedback = response.choices[0].message.content.strip()
-            await update.message.reply_text(feedback, parse_mode="Markdown", disable_web_page_preview=True)
+            
+            word, word_translation_en, example_sentences_en, example_sentences_nl = get_sentenses_from_json(SENTENSES_FILE, level)
+
+            reply_to_send_x = f"""Original sentences :
+
+                                """ + "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_nl)])
+
+            if style_code == 'X':
+
+                await update.message.reply_text(reply_to_send_x, parse_mode="Markdown", disable_web_page_preview=True)
+
+            else:
+
+                await update.message.reply_text(feedback, parse_mode="Markdown", disable_web_page_preview=True)
 
         except Exception as e:
             logger.error(f"Error in check_translation: {e}")

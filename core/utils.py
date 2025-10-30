@@ -28,3 +28,16 @@ def get_random_media(path):
 
     row = random.choice(rows)
     return row["title"], row["type"]
+
+def get_sentenses_from_json(path, level='B1'):
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+        candidates = [w for w in data if w["level"] == level]
+        entry = random.choice(candidates)
+        word = entry["word"]
+        examples = entry["examples"]
+        word_translation_en = entry["translation_en"]
+        example_sentences_en = [ex["en"] for ex in examples]
+        example_sentences_nl = [ex["nl"] for ex in examples]
+
+    return word, word_translation_en, example_sentences_en, example_sentences_nl
