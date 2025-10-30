@@ -74,13 +74,7 @@ class TranslationHandler:
         context.user_data['focus_examples_nl'] = example_sentences_nl
 
         
-        message_to_send_x = dedent(f"""
-                                🎯 Focus word: **{word}** ({word_translation_en})
-
-                                Translate the following sentences into Dutch and try to use **{word}**:
-
-                                { "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_en)]) }
-                            """).strip()
+        message_to_send_x = dedent(f"""🎯 Focus word: **{word}** ({word_translation_en})\n\nTranslate the following sentences into Dutch and try to use **{word}**:\n\n{ "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_en)]) }""").strip()
 
         prompts = {
             'A': (
@@ -221,11 +215,7 @@ class TranslationHandler:
             
             example_sentences_nl = context.user_data['focus_examples_nl']
 
-            reply_to_send_x = dedent(f"""
-                                🎯 Original sentences:
-
-                                { "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_nl)]) }
-                            """).strip()
+            reply_to_send_x = dedent(f"""🎯 Original sentences:\n\n{ "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_nl)]) }""").strip()
 
             if style_code == 'X':
 
