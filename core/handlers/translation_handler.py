@@ -153,7 +153,7 @@ class TranslationHandler:
             text_to_send= f"💡 The words we are practicing are: {words_translation}.\n\n" + text_to_translate
 
             if style_code == 'X':
-                await update.message.reply_text(message_to_send_x)
+                await update.message.reply_text(message_to_send_x, parse_mode="Markdown", disable_web_page_preview=True)
             else:
                 await update.message.reply_text(
                     f"Oké, laten we vertalen! Translate the following text into Dutch (level {level}, style: {style_code}, topic: '{topic}'):\n\n"
