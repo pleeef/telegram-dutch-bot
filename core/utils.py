@@ -1,4 +1,4 @@
-import csv, datetime, random, json
+import pandas as pd, csv, datetime, random, json
 
 def load_words_from_csv(path):
     with open(path, encoding="utf-8") as f:
