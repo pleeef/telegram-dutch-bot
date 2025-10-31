@@ -85,7 +85,22 @@ class TranslationHandler:
                 f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
                 f"Do not include the Dutch words themselves in the sentences. "
                 f"Use only natural English words that match the meaning of each Dutch word. "
-                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences. "
+                f"Follow CEFR strictly for levels mapping:\n"
+                f"A2 level:\n"
+                f"- 6–9 word sentences\n"
+                f"- Everyday vocabulary only\n"
+                f"- No subordinate clauses\n\n"
+
+                f"B1 level:\n"
+                f"- 12–18 word sentences\n"
+                f"- Exactly one subordinate clause (because / when / that)\n"
+                f"- Can express reasons or feelings\n\n"
+
+                f"B2 level:\n"
+                f"- More complex sentence structure\n"
+                f"- Use linking words (however / although / yet)\n"
+                f"- One descriptive or metaphorical expression is allowed\n\n"
             ),
             'N': (
                 f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
@@ -95,7 +110,22 @@ class TranslationHandler:
                 f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
                 f"Do not include the Dutch words themselves in the sentences. "
                 f"Use only natural English words that match the meaning of each Dutch word. "
-                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences. "
+                f"Follow CEFR strictly for levels mapping:\n"
+                f"A2 level:\n"
+                f"- 6–9 word sentences\n"
+                f"- Everyday vocabulary only\n"
+                f"- No subordinate clauses\n\n"
+
+                f"B1 level:\n"
+                f"- 12–18 word sentences\n"
+                f"- Exactly one subordinate clause (because / when / that)\n"
+                f"- Can express reasons or feelings\n\n"
+
+                f"B2 level:\n"
+                f"- More complex sentence structure\n"
+                f"- Use linking words (however / although / yet)\n"
+                f"- One descriptive or metaphorical expression is allowed\n\n"
             ),
             'F': (
                 f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
@@ -105,7 +135,22 @@ class TranslationHandler:
                 f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
                 f"Do not include the Dutch words themselves in the sentences. "
                 f"Use only natural English words that match the meaning of each Dutch word. "
-                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences. "
+                f"Follow CEFR strictly for levels mapping:\n"
+                f"A2 level:\n"
+                f"- 6–9 word sentences\n"
+                f"- Everyday vocabulary only\n"
+                f"- No subordinate clauses\n\n"
+
+                f"B1 level:\n"
+                f"- 12–18 word sentences\n"
+                f"- Exactly one subordinate clause (because / when / that)\n"
+                f"- Can express reasons or feelings\n\n"
+
+                f"B2 level:\n"
+                f"- More complex sentence structure\n"
+                f"- Use linking words (however / although / yet)\n"
+                f"- One descriptive or metaphorical expression is allowed\n\n"
             ),
             'T': (
                 f"Write a short, simple text in English (three sentences), the vocabulary and grammar must strictly match level {level} for language learners. "
@@ -115,7 +160,22 @@ class TranslationHandler:
                 f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
                 f"Do not include the Dutch words themselves in the sentences. "
                 f"Use only natural English words that match the meaning of each Dutch word. "
-                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences."
+                f"Do not provide the translation of these words. No explanation, no quotation marks. Give only the sentences. "
+                f"Follow CEFR strictly for levels mapping:\n"
+                f"A2 level:\n"
+                f"- 6–9 word sentences\n"
+                f"- Everyday vocabulary only\n"
+                f"- No subordinate clauses\n\n"
+
+                f"B1 level:\n"
+                f"- 12–18 word sentences\n"
+                f"- Exactly one subordinate clause (because / when / that)\n"
+                f"- Can express reasons or feelings\n\n"
+
+                f"B2 level:\n"
+                f"- More complex sentence structure\n"
+                f"- Use linking words (however / although / yet)\n"
+                f"- One descriptive or metaphorical expression is allowed\n\n"
             ),
             'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
         }

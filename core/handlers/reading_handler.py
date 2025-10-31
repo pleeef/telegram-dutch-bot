@@ -56,7 +56,22 @@ class ReadingHandler:
                     f"over een belangrijk historisch feit ergens in de wereld dat plaatsvond op {random_date_str} "
                     f"(dit kan overal plaatsvinden, bijvoorbeeld in Europa, Azië, Afrika, Amerika, enz.). "
                     f"of over een beroemd persoon die op deze dag is geboren of over een boek dat in het gekozen jaar is gepubliceerd. "
-                    f"Gebruik duidelijke taal die geschikt is voor taalleerders."
+                    f"Gebruik duidelijke taal die geschikt is voor taalleerders. "
+                    f"Volg het CEFR strikt voor de niveautoewijzing:\n"
+                    f"A2-niveau:\n"
+                    f"- Zinnen van 6–9 woorden\n"
+                    f"- Alleen alledaagse woordenschat\n"
+                    f"- Geen bijzinnen\n\n"
+
+                    f"B1-niveau:\n"
+                    f"- Zinnen van 12–18 woorden\n"
+                    f"- Precies één bijzin (omdat / wanneer / dat)\n"
+                    f"- Kan redenen of gevoelens uitdrukken\n\n"
+
+                    f"B2-niveau:\n"
+                    f"- Complexere zinsbouw\n"
+                    f"- Gebruik verbindingswoorden (echter / hoewel / toch)\n"
+                    f"- Eén beschrijvende of metaforische uitdrukking is toegestaan\n\n"
                 )
             else:
                 # Fantastic future
@@ -64,10 +79,42 @@ class ReadingHandler:
                     f"Schrijf een korte fantasierijke tekst (max 250 woorden) in het Nederlands op niveau {level} "
                     f"over een bijzonder of belangrijk toekomstig feit dat zal plaatsvinden op {random_date_str}. "
                     f"Verzin creatieve details, technologieën of gebeurtenissen die in die tijd zouden kunnen bestaan. "
-                    f"Maak het verhaal boeiend maar eenvoudig genoeg voor taalleerders."
+                    f"Maak het verhaal boeiend maar eenvoudig genoeg voor taalleerders. "
+                    f"Volg het CEFR strikt voor de niveautoewijzing:\n"
+                    f"A2-niveau:\n"
+                    f"- Zinnen van 6–9 woorden\n"
+                    f"- Alleen alledaagse woordenschat\n"
+                    f"- Geen bijzinnen\n\n"
+
+                    f"B1-niveau:\n"
+                    f"- Zinnen van 12–18 woorden\n"
+                    f"- Precies één bijzin (omdat / wanneer / dat)\n"
+                    f"- Kan redenen of gevoelens uitdrukken\n\n"
+
+                    f"B2-niveau:\n"
+                    f"- Complexere zinsbouw\n"
+                    f"- Gebruik verbindingswoorden (echter / hoewel / toch)\n"
+                    f"- Eén beschrijvende of metaforische uitdrukking is toegestaan\n\n"
                 )
         elif topic == "media":
-            prompt = f"Schrijf een korte tekst op niveau {level} over {media_type} '{title}'."
+            prompt = (
+                    f"Schrijf een korte tekst op niveau {level} over {media_type} '{title}'. "
+                    f"Volg het CEFR strikt voor de niveautoewijzing:\n"
+                    f"A2-niveau:\n"
+                    f"- Zinnen van 6–9 woorden\n"
+                    f"- Alleen alledaagse woordenschat\n"
+                    f"- Geen bijzinnen\n\n"
+
+                    f"B1-niveau:\n"
+                    f"- Zinnen van 12–18 woorden\n"
+                    f"- Precies één bijzin (omdat / wanneer / dat)\n"
+                    f"- Kan redenen of gevoelens uitdrukken\n\n"
+
+                    f"B2-niveau:\n"
+                    f"- Complexere zinsbouw\n"
+                    f"- Gebruik verbindingswoorden (echter / hoewel / toch)\n"
+                    f"- Eén beschrijvende of metaforische uitdrukking is toegestaan\n\n"
+            )
         else:
             prompt = f"Schrijf een korte tekst (max 250 woorden) in het Nederlands op niveau {level} over het onderwerp '{topic}'."
 
