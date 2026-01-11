@@ -76,6 +76,52 @@ class TranslationHandler:
         
         message_to_send_x = dedent(f"""🎯 Focus word: **{word}** ({word_translation_en})\n\nTranslate the following sentences into Dutch and try to use **{word}**:\n\n{ "\n".join([f"{i+1}) {s}" for i, s in enumerate(example_sentences_en)]) }""").strip()
 
+        # Translate the 3 random Dutch words to English FIRST, so the main prompt can use English target words.
+        # If this translation step fails, we fall back safely.
+        english_words = []
+        words_translation = ""
+        try:
+            translation_resp = self.openai.chat_completion(
+                model="gpt-4o-mini",
+                messages=[
+                    {"role": "system", "content": "You are a helpful language assistant."},
+                    {
+                        "role": "user",
+                        "content": (
+                            "Translate these Dutch words to English. "
+                            "Return ONLY the three English translations in the same order, separated by ' | '. "
+                            f"Words: {random_words[0]}, {random_words[1]}, {random_words[2]}."
+                        ),
+                    },
+                ],
+                max_tokens=50,
+                temperature=0.2,
+            )
+
+            english_line = translation_resp.choices[0].message.content.strip()
+            english_words = [w.strip() for w in english_line.split("|") if w.strip()]
+
+            # Fallback to avoid crashes if the model returns something unexpected
+            if len(english_words) != 3:
+                english_words = ["(translation)", "(translation)", "(translation)"]
+
+            # Nice display string for the user: 'nl' - en
+            words_translation = (
+                f"'{random_words[0]}' - {english_words[0]}, "
+                f"'{random_words[1]}' - {english_words[1]}, "
+                f"'{random_words[2]}' - {english_words[2]}"
+            )
+
+        except Exception as e:
+            logger.error(f"Error translating random words: {e}")
+            # Safe fallback: keep bot working even if translation fails
+            english_words = [random_words[0], random_words[1], random_words[2]]
+            words_translation = (
+                f"'{random_words[0]}' - (translation), "
+                f"'{random_words[1]}' - (translation), "
+                f"'{random_words[2]}' - (translation)"
+            )
+
         prompts = {
             'A': (
                 f"Write a short and simple English text of exactly three sentences. "
@@ -83,9 +129,8 @@ class TranslationHandler:
                 f"The tone should be playful and slightly absurd, but it must remain simple and clear. "
                 f"Avoid poetic language, complex imagery, and metaphorical expressions. "
                 f"Use only common everyday English words. "
-                f"Each of the three sentences must express the meaning of one of these Dutch words: "
-                f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
-                f"Do not include the Dutch words themselves. "
+                f"Use the following target English words EXACTLY once each, one per sentence, in this order: "
+                f"'{english_words[0]}', '{english_words[1]}', '{english_words[2]}'. "
                 f"Give only natural English sentences. No lists, no explanation, no quotation marks. "
                 f"Strict CEFR requirements:\n"
                 f"A2 level:\n"
@@ -112,9 +157,8 @@ class TranslationHandler:
                 f"The tone may be slightly absurd or dry, but it must remain simple and clear. "
                 f"Avoid poetic language, complex imagery, and metaphorical expressions. "
                 f"Use only common everyday English words. "
-                f"Each of the three sentences must express the meaning of one of these Dutch words: "
-                f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
-                f"Do not include the Dutch words themselves. "
+                f"Use the following target English words EXACTLY once each, one per sentence, in this order: "
+                f"'{english_words[0]}', '{english_words[1]}', '{english_words[2]}'. "
                 f"Give only natural English sentences. No lists, no explanation, no quotation marks. "
                 f"Strict CEFR requirements:\n"
                 f"A2 level:\n"
@@ -141,9 +185,8 @@ class TranslationHandler:
                 f"The tone should feel like a very simple modern fairytale or young adult story, but not poetic. "
                 f"Avoid complex imagery and metaphorical expressions; keep descriptions clear and concrete. "
                 f"Use only common everyday English words. "
-                f"Each of the three sentences must express the meaning of one of these Dutch words: "
-                f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
-                f"Do not include the Dutch words themselves. "
+                f"Use the following target English words EXACTLY once each, one per sentence, in this order: "
+                f"'{english_words[0]}', '{english_words[1]}', '{english_words[2]}'. "
                 f"Give only natural English sentences. No lists, no explanation, no quotation marks. "
                 f"Strict CEFR requirements:\n"
                 f"A2 level:\n"
@@ -170,9 +213,8 @@ class TranslationHandler:
                 f"The tone should be like a very simple travel journal that describes a place or event. "
                 f"Avoid poetic language, complex imagery, and metaphorical expressions; keep everything concrete and clear. "
                 f"Use only common everyday English words. "
-                f"Each of the three sentences must express the meaning of one of these Dutch words: "
-                f"'{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. "
-                f"Do not include the Dutch words themselves. "
+                f"Use the following target English words EXACTLY once each, one per sentence, in this order: "
+                f"'{english_words[0]}', '{english_words[1]}', '{english_words[2]}'. "
                 f"Give only natural English sentences. No lists, no explanation, no quotation marks. "
                 f"Strict CEFR requirements:\n"
                 f"A2 level:\n"
@@ -193,7 +235,14 @@ class TranslationHandler:
                 f"- One simple descriptive phrase allowed.\n"
                 f"- Still avoid poetic or metaphorical expressions.\n\n"
             ),
-            'L': (f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. The sentences should focus on common vocabulary and straightforward grammar. The text should be related to the topic '{topic}' if possible. Give only the sentences, without any extra explanation or quotation marks."),
+            'L': (
+                f"Generate a short text of three sentences in English in a clear, simple style, like sentences found in a language learning textbook for level {level}. "
+                f"The sentences should focus on common vocabulary and straightforward grammar. "
+                f"The text should be related to the topic '{topic}' if possible. "
+                f"Use the following target English words EXACTLY once each, one per sentence, in this order: "
+                f"'{english_words[0]}', '{english_words[1]}', '{english_words[2]}'. "
+                f"Give only the sentences, without any extra explanation or quotation marks."
+            ),
         }
 
         prompt = prompts.get(style_code, prompts['L']) # Default to Learning style for translation
@@ -216,16 +265,7 @@ class TranslationHandler:
             context.user_data['text_to_translate'] = text_to_translate
 
             self.memory.add_sentence(context.user_data['mode'], text_to_translate)
-            
-            response = self.openai.chat_completion(
-                model="gpt-4o",
-                messages=[
-                    {"role": "system", "content": "You are a helpful Dutch language teacher."},
-                    {"role": "user", "content": f"Give translation to English for this words: '{random_words[0]}', '{random_words[1]}', '{random_words[2]}'. use format:  '{random_words[0]}' - translation, '{random_words[1]}' - translation, '{random_words[2]}' - translation, that's all. "}
-                ],
-                max_tokens=50
-            )
-            words_translation = response.choices[0].message.content.strip()
+
             text_to_send= f"💡 The words we are practicing are: {words_translation}.\n\n" + text_to_translate
 
             if style_code == 'X':
