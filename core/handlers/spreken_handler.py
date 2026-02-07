@@ -31,7 +31,50 @@ class SprekenHandler:
     def get_message_handler(self):
         # block=False ensures this handler won't stop other message handlers.
         return MessageHandler(filters.VOICE, self.check_speaking, block=False)
+    
+    def get_secret_voice_handler(self):
+        # block=False чтобы не мешать другим хэндлерам
+        return MessageHandler(filters.VOICE, self.secret_voice_corrector, block=False)
 
+    async def secret_voice_corrector(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
+        user = update.effective_user
+        if not is_authorized(user.id):
+            return
+
+        # Если сейчас активен какой-то режим (например /spreken) — не вмешиваемся
+        mode = context.user_data.get("mode")
+        if mode is not None:
+            return
+
+        voice = update.message.voice
+        if not voice:
+            return
+
+        await update.message.reply_text("✍️ Ik schrijf het uit…")
+
+        tg_file = await context.bot.get_file(voice.file_id)
+        tmp_path = data_dir() / f"tmp_secret_{user.id}.ogg"
+        await tg_file.download_to_drive(custom_path=str(tmp_path))
+
+        try:
+            transcript = self.openai.transcribe_audio(str(tmp_path), language="nl").strip()
+            corrected = await self._grammar_correct_nl(transcript)
+
+            await update.message.reply_text(
+                "ВАШ ответ:\n"
+                f"{transcript}\n\n"
+                "Корректный ответ:\n"
+                f"{corrected}"
+            )
+        except Exception as e:
+            logger.error(f"Error in secret voice corrector: {e}")
+            await update.message.reply_text("Sorry, something went wrong while processing your voice.")
+        finally:
+            try:
+                Path(tmp_path).unlink(missing_ok=True)
+            except Exception:
+                pass    
+    
     async def run(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         user = update.effective_user
         if not is_authorized(user.id):

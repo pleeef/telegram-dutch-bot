@@ -30,7 +30,8 @@ class BotApp:
 
         spreken_handler = SprekenHandler(self.memory, self.openai)
         self.app.add_handler(spreken_handler.get_command_handler(), group=0)
-        self.app.add_handler(spreken_handler.get_message_handler(), group=2)
+        self.app.add_handler(spreken_handler.get_message_handler(), group=3)
+        self.app.add_handler(spreken_handler.get_secret_voice_handler(), group=10)
 
         reading_handler = ReadingHandler(self.openai)
         self.app.add_handler(reading_handler.get_command_handler(), group=0)
