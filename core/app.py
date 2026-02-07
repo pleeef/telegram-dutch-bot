@@ -31,6 +31,7 @@ class BotApp:
         spreken_handler = SprekenHandler(self.memory, self.openai)
         self.app.add_handler(spreken_handler.get_command_handler(), group=0)
         self.app.add_handler(spreken_handler.get_message_handler(), group=3)
+        # Secret personal voice correction (runs after other handlers)
         self.app.add_handler(spreken_handler.get_secret_voice_handler(), group=10)
 
         reading_handler = ReadingHandler(self.openai)
@@ -45,6 +46,7 @@ class BotApp:
     def run(self):
         print("Bot started...")
         self.app.run_polling()
+
 
 if __name__ == "__main__":
     BotApp().run()

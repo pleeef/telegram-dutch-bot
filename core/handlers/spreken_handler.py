@@ -43,7 +43,7 @@ class SprekenHandler:
 
         # Если сейчас активен какой-то режим (например /spreken) — не вмешиваемся
         mode = context.user_data.get("mode")
-        if mode is not None:
+        if mode == "spreken" and context.user_data.get("spreken_task"):
             return
 
         voice = update.message.voice
