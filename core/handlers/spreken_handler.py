@@ -8,6 +8,7 @@ from core.utils import (
     image_abs_path,
     data_dir,
 )
+import asyncio
 import logging
 import time
 from pathlib import Path
@@ -71,21 +72,28 @@ class SprekenHandler:
             ),
         )
 
-        # Через prep_seconds напомним "начинай говорить"
-        context.job_queue.run_once(
-            callback=self._prep_done_job,
-            when=prep_seconds,
-            data={"chat_id": update.effective_chat.id},
-            name=f"spreken_prep_{update.effective_user.id}",
+        # After prep_seconds, send a "start speaking" prompt (without JobQueue dependency)
+        context.application.create_task(
+            self._send_prep_prompt_later(update.effective_chat.id, prep_seconds, context)
         )
 
         logger.info(
             f"User {user.id} started speaking task id={task.get('id')} prep={prep_seconds}s answer={answer_seconds}s"
         )
 
-    async def _prep_done_job(self, context: ContextTypes.DEFAULT_TYPE):
-        chat_id = context.job.data["chat_id"]
-        await context.bot.send_message(chat_id=chat_id, text="🔔 Begin met spreken! Stuur je spraakbericht nu.")
+    async def _send_prep_prompt_later(self, chat_id: int, delay_seconds: int, context: ContextTypes.DEFAULT_TYPE):
+        """Send the "begin speaking" prompt after a delay.
+
+        We avoid PTB JobQueue to keep deployment simple.
+        """
+        try:
+            await asyncio.sleep(max(0, int(delay_seconds)))
+            await context.bot.send_message(
+                chat_id=chat_id,
+                text="🔔 Begin met spreken! Stuur je spraakbericht nu.",
+            )
+        except Exception as e:
+            logger.error(f"Failed to send prep prompt: {e}")
 
     async def check_speaking(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Обрабатывает voice-ответ для /spreken."""
@@ -134,6 +142,8 @@ class SprekenHandler:
                 "Возможный ответ:\n"
                 f"{possible}"
             )
+            context.user_data.pop("mode", None)
+            context.user_data.pop("spreken_task", None)
 
         except Exception as e:
             logger.error(f"Error in speaking processing: {e}")
@@ -151,7 +161,7 @@ class SprekenHandler:
         """
         # Вариант A (если у тебя есть метод transcribe_audio):
         if hasattr(self.openai, "transcribe_audio"):
-            return (await self.openai.transcribe_audio(str(audio_path), language="nl")).strip()
+            return self.openai.transcribe_audio(str(audio_path), language="nl").strip()
 
         # Вариант B (если у тебя синхронный метод transcribe_audio):
         if hasattr(self.openai, "transcribe_audio_sync"):
