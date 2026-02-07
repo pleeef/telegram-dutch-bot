@@ -1,0 +1,42 @@
+[
+{
+  "id": "1",
+  "image": "images/1.png",
+  "answer_nl": "Ik heb op vrijdagavond mijn sport. Ik moet op vrijdagavond vroeg thuis zijn voor mijn kinderen.",
+  "question_nl": "WAAROM WIL JIJ PER SE OP MAANDAGAVOND WERKEN?",
+  "prep_seconds": 5,
+  "answer_seconds": 20
+},
+{
+  "id": "2",
+  "image": "images/2.png",
+  "answer_nl": "Sorry, ik was eerst.",
+  "question_nl": "-",
+  "prep_seconds": 5,
+  "answer_seconds": 20
+},
+{
+  "id": "3",
+  "image": "images/3.png",
+  "answer_nl": "We kunnen de kinderen schminken.",
+  "question_nl": "WAT STEL JIJ VOOR ACTIVITEIT VOOR?",
+  "prep_seconds": 5,
+  "answer_seconds": 20
+},
+{
+  "id": "4",
+  "image": "images/4.png",
+  "answer_nl": "Je kunt het beste vroeg naar bed gaan. Je moet morgen fit zijn.",
+  "question_nl": "WAT ZAL IK DOEN? ZAL IK VROEG GAAN SLAPEN OF ZAL IK NOG GAAN STUDEREN?",
+  "prep_seconds": 5,
+  "answer_seconds": 20
+},
+{
+  "id": "5",
+  "image": "images/5.png",
+  "answer_nl": "Je kunt het beste de opleiding online doen. Je hebt geen reistijd. En het is ook goedkoper.",
+  "question_nl": "HOE KAN IK HET BESTE DE OPLEIDING TANDARTSASSISTENTE GAAN VOLGEN? THUIS OF IN EEN KLAS?",
+  "prep_seconds": 5,
+  "answer_seconds": 20
+}
+]

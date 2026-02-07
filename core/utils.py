@@ -1,4 +1,9 @@
-import csv, datetime, random, json
+import csv
+import datetime
+import json
+import random
+from pathlib import Path
+from typing import Dict, List, Optional
 
 def load_words_from_csv(path):
     with open(path, encoding="utf-8") as f:
@@ -41,3 +46,42 @@ def get_sentenses_from_json(path, level='B1'):
         example_sentences_nl = [ex["nl"] for ex in examples]
 
     return word, word_translation_en, example_sentences_en, example_sentences_nl
+
+# --- Speaking exam (images) helpers ---
+
+def project_root() -> Path:
+    """Return absolute project root path (telegram-dutch-bot/)."""
+    # core/utils.py -> parents[1] is the project root
+    return Path(__file__).resolve().parents[1]
+
+
+def data_dir() -> Path:
+    return project_root() / "data"
+
+
+def images_json_path() -> Path:
+    return data_dir() / "images.json"
+
+
+def load_speaking_images_tasks() -> List[Dict]:
+    """Load speaking image tasks from data/images.json."""
+    p = images_json_path()
+    with p.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+
+def pick_random_task(tasks: List[Dict], exclude_ids: Optional[set] = None) -> Dict:
+    """Pick a random task, optionally excluding some task ids to reduce repeats."""
+    exclude_ids = exclude_ids or set()
+    pool = [t for t in tasks if str(t.get("id")) not in exclude_ids]
+    if not pool:
+        pool = tasks
+    return random.choice(pool)
+
+
+def image_abs_path(task: Dict) -> Path:
+    """Return absolute path to the task image file.
+
+    Expects task['image'] like 'images/1.png' relative to data/.
+    """
+    return data_dir() / str(task["image"])

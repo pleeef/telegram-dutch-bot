@@ -8,6 +8,8 @@ from core.handlers.dictate_handler import DictateHandler
 from core.handlers.reading_handler import ReadingHandler
 from core.handlers.word_handler import WordHandler
 from core.handlers.explain_handler import ExplainHandler
+from core.handlers.spreken_handler import SprekenHandler
+
 
 class BotApp:
     def __init__(self):
@@ -25,6 +27,10 @@ class BotApp:
         translation_handler = TranslationHandler(self.memory, self.openai)
         self.app.add_handler(translation_handler.get_command_handler(), group=0)
         self.app.add_handler(translation_handler.get_message_handler(), group=2)
+
+        spreken_handler = SprekenHandler(self.memory, self.openai)
+        self.app.add_handler(spreken_handler.get_command_handler(), group=0)
+        self.app.add_handler(spreken_handler.get_message_handler(), group=2)
 
         reading_handler = ReadingHandler(self.openai)
         self.app.add_handler(reading_handler.get_command_handler(), group=0)
