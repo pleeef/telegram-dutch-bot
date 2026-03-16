@@ -6,6 +6,9 @@
 
 An interactive Telegram bot for practicing Dutch — integrates OpenAI GPT-4o to generate reading, translation, and listening exercises.
 
+## Bot Interaction Preview
+![Bot Interaction Preview](assets/preview.png)
+
 ## ✨ Features
 - `/start` – overview of all modes
 - `/translation` – translate short texts with feedback and score
